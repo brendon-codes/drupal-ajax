@@ -1,0 +1,121 @@
+<?PHP
+/**
+ * Automatic ajax validation
+ *
+ * @author BrendonC
+ *
+ *
+ */
+
+
+function zzzz_ajax_validation_menu($may_cache) {
+  if (!$may_cache) {
+    $items[] = array(
+      'path' => 'admin/settings/ajax-validation',
+      'title' => t('Ajax Validation Settings'),
+      'description' => t('Controls which forms should use AJAX Validation.'),
+      'callback' => 'drupal_get_form',
+      'callback arguments' => 'zzzz_ajax_validation_admin',
+      'access' => user_access('access administration pages'),
+      'type' => MENU_NORMAL_ITEM,
+    );
+  }
+  return $items;
+}
+
+function zzzz_ajax_validation_getTypes() {
+  $out = array();
+  $types = node_get_types();
+  foreach ($types as $k => $v) {
+    $out[$k] = $v->name;
+  }
+  return $out;
+}
+
+function zzzz_ajax_validation_admin() {
+  $form['ajax_validation_types'] = array(
+    '#type' => 'select',
+    '#multiple' => true,
+    '#options' => zzzz_ajax_validation_getTypes(),
+    '#title' => t('Node Forms to Use Ajax Validation'),
+    '#default_value' => variable_get('ajax_validation_types', array()),
+    '#size' => 20,
+    '#description' => t("Select the forms you wish to use ajax validation.")
+  );
+  return system_settings_form($form);
+}
+
+function zzzz_ajax_validation_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  if ($op === 'prepare' && zzzz_ajax_validation_compareTypes($node->type)) {
+    drupal_add_js(drupal_get_path('module', 'zzzz_ajax_validation') .
+      '/AjaxValidation.js', 'module');
+  }
+  elseif (
+    $op === 'validate' &&
+    zzzz_ajax_validation_compareTypes($node->type) &&
+    array_key_exists('ajax-validation', $_REQUEST)
+  ) {
+    zzzz_ajax_validation_go();
+  }
+}
+
+function zzzz_ajax_validation_isType($form_id) {
+  $target = '_node_form';
+  $target_len = strlen($target);
+  if (substr($form_id, -$target_len) === $target) {
+    $type = substr($form_id, 0, strlen($form_id) - $target_len);
+    return zzzz_ajax_validation_compareTypes($type);
+  }
+  return false;
+}
+
+function zzzz_ajax_validation_compareTypes($type) {
+  $types = variable_get('ajax_validation_types', array());
+  return array_key_exists($type, $types);
+}
+
+
+function zzzz_ajax_validation_form_alter($form_id, &$form) {
+  if (zzzz_ajax_validation_isType($form_id)) {
+    $submitters = array();
+    foreach ($form as $form_key => $form_val) {
+      if (is_array($form_val) && array_key_exists('#type', $form_val) &&
+          $form_val['#type'] === 'submit') {
+        $submitters[] = 'edit-' . $form_key;
+      }
+    }
+    $out = sprintf('AjaxValidation.submitters=%s;', json_encode($submitters));
+    drupal_add_js($out, 'inline');
+  }
+}
+
+
+function zzzz_ajax_validation_go() {
+  drupal_get_messages(null, true);
+  $form_errors = form_get_errors();
+  $data = zzzz_ajax_validation_buildOutput($form_errors);
+  header("Content-Type: application/json; charset=UTF-8");
+  print json_encode($data);
+  exit;
+}
+
+
+function zzzz_ajax_validation_buildOutput($form_errors) {
+  $out = array(
+    'status' => (sizeof($form_errors) === 0),
+    'errors' => array()
+  );
+  if (is_array($form_errors)) {
+    foreach ($form_errors as $k => $v) {
+      $out['errors'][] = array(
+        'id' => form_clean_id("edit-" . $k),
+        'error' => $v
+      );
+    }
+  }
+  return $out;
+}
+
+
+
+?>

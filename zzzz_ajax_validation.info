@@ -1,0 +1,5 @@
+name = ZZZZ AJAX Validation
+description = Automatically validates any form using AJAX. This module needs to run last.
+package = ZZZZ AJAX Validation
+dependencies = jquery_update
+core = 5.x
