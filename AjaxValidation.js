@@ -10,12 +10,13 @@ AjaxValidation.conf = {
   jquery_ver : '1.2.0'
 }
 
+AjaxValidation.pass = true;
+
 AjaxValidation.preprocess = function() {
   var v, i, _i, j_ver, jq_current_ver, pass;
   jq_current_ver = jQuery.fn.jquery.toString();
   v = jq_current_ver.split('.');
   j_ver = AjaxValidation.conf.jquery_ver.split('.');
-  pass = true;
   for (i = 0, _i = j_ver.length; i < _i; i++) {
     if (parseInt(v[i]) < parseInt(j_ver[i])) {
       window.alert(
@@ -26,52 +27,49 @@ AjaxValidation.preprocess = function() {
         "jQuery. The jQuery Update homepage can be found at " +
         "http://drupal.org/project/jquery_update. Until jQuery is upgraded, " +
         "AJAX validation will not be activated for this form.");
-      pass = false;
+      AjaxValidation.pass = false;
     }
-  }
-  if (pass) {
-    $(AjaxValidation.init);
   }
 }
 
-AjaxValidation.init = function() {
-  var sub, i, _i;
-  sub = "";
-  for (i = 0, _i = AjaxValidation.submitters.length; i < _i; i++) {
-    if (i > 0) {
-      sub += ", ";
-    }
-    sub += "#" + AjaxValidation.submitters[i];
-  }
-  subs = $(sub)
-  subs.click(function(){
-    return AjaxValidation.go(this, this.form);
-  });
-}
 
-AjaxValidation.go = function(submitter_, thisForm) {
-  var data, loadingBox, formObj, data, submitter, submitterVal;
-  formObj = $(thisForm);
-  data = $('#node-form').serializeArray();
-  data[data.length] = {
-    name : 'ajax-validation',
-    value : 1
-  };
-  submitter = $(submitter_);
-  submitterVal = submitter.val();
-  submitter.val('Loading...');
-  $.ajax({
-    url : formObj[0].getAttribute('action'),
-    data : data,
-    type : 'POST',
-    async : true,
-    dataType : 'json',
-    success : function(data) {
-      submitter.val(submitterVal);
-      AjaxValidation.response(submitter, formObj, data);
-    }
-  })
-  return false;
+AjaxValidation.go = function(submitter_) {
+  var data, loadingBox, formObj, data, submitter, submitterVal, thisForm;
+  if (!AjaxValidation.pass) {
+    return false;
+  }
+  else {
+    formObj = $(submitter_.form);
+    submitter = $(submitter_);
+    submitterVal = submitter.val();
+    data = formObj.serializeArray();
+    data[data.length] = {
+      name: submitter.attr('name'),
+      value: submitterVal
+    };
+    data[data.length] = {
+      name: 'ajax-validation',
+      value: 1
+    };
+    submitter.val('Loading...');
+    /**
+     * Eventually we may want to append the submit hidden
+     * field to the form list
+     */
+    $.ajax({
+      url: formObj[0].getAttribute('action'),
+      data: data,
+      type: 'POST',
+      async: true,
+      dataType: 'json',
+      success: function(data){
+        submitter.val(submitterVal);
+        AjaxValidation.response(submitter, formObj, data);
+      }
+      
+    })
+    return false;
+  }
 }
 
 
@@ -82,7 +80,7 @@ AjaxValidation.scroller = function(submitter) {
     box = submitter;
     found = false;
     // Watch for thickbox
-    while (box.parentNode !== null && box.parentNode.id !== 'TB_window') {
+    while (box.parentNode !== null && box.id !== 'TB_window') {
       box = box.parentNode;
       // Document
       if (box === document) {
@@ -108,6 +106,14 @@ AjaxValidation.scroller = function(submitter) {
           found = true;
         }
       }
+      // Any other element
+      else {
+        if (box.scrollTop &&
+            box.scrollTop > 0) {
+          box.scrollTop -= scroll_weight;
+          found = true;
+        }
+      }
     }
     // Check if completed
     if (!found) {
@@ -116,6 +122,7 @@ AjaxValidation.scroller = function(submitter) {
     return true;
   }, 100);
 }
+
 
 AjaxValidation.response = function(submitter, formObj, data){
   var i, _i, thisItem, log, errBox, h;
@@ -144,11 +151,18 @@ AjaxValidation.response = function(submitter, formObj, data){
    * Success
    */
   else {
-    h = $('<input type="hidden">');
-    h.attr('name', submitter.attr('name'));
-    h.val(submitter.val());
-    formObj.append(h);
-    formObj[0].submit();
+    /**
+     * If no redirect, then simply show messages
+     */
+    if (data.redirect === null) {
+      console.log(data.messages);
+    }
+    /**
+ * If redirect, then perform redirect
+ */
+    else {
+      window.location.href = '/' + data.redirect;
+    }
   }
 }
 
