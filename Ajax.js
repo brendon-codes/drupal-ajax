@@ -123,43 +123,54 @@ Ajax.scroller = function(submitter) {
   }, 100);
 }
 
-
-Ajax.response = function(submitter, formObj, data){
+Ajax.message = function(messages, type, formObj, submitter) {
   var i, _i, thisItem, log, errBox, h;
   log = $('<ul>');
+  errBox = $(".messages." + type, formObj[0])
+  for (i = 0, _i = messages.length; i < _i; i++) {
+    thisItem = $('#' + messages[i].id, formObj[0])
+    thisItem.addClass(type);
+    if (messages[i].required) {
+      thisItem.addClass('required');
+    }
+    log.append('<li>' + messages[i].value + '</li>');
+  }
+  if (errBox.length === 0) {
+    errBox = $("<div class='messages " + type + "'>");
+    formObj.prepend(errBox);      
+  }
+  errBox.html(log);
+  Ajax.scroller(submitter[0]);
+}
+
+Ajax.response = function(submitter, formObj, data){
   /**
    * Failure
    */
   if (data.status === false) {
-    errBox = $(".messages.error", formObj[0])
-    for (i = 0, _i = data.errors.length; i < _i; i++) {
-      thisItem = $('#' + data.errors[i].id, formObj[0])
-      thisItem.addClass('error');
-      if (data.errors[i].required) {
-        thisItem.addClass('required');
-      }
-      log.append('<li>' + data.errors[i].error + '</li>');
-    }
-    if (errBox.length === 0) {
-      errBox = $("<div class='messages error'>");
-      formObj.prepend(errBox);      
-    }
-    errBox.html(log);
-    Ajax.scroller(submitter[0]);
+    Ajax.message(data.messages_error, 'error', formObj, submitter);
   }
   /**
    * Success
    */
   else {
-    /**
-     * If no redirect, then simply show messages
-     */
+    // If no redirect, then simply show messages
     if (data.redirect === null) {
-      console.log(data.messages);
+      if (data.messages_status.length > 0) {
+        Ajax.message(data.messages_status, 'status', formObj, submitter);
+      }
+      if (data.messages_warning.length > 0) {
+        Ajax.message(data.messages_warning, 'warning', formObj, submitter);
+      }
+      if (data.messages_status.length === 0 &&
+          data.messages_warning.length === 0) {
+        Ajax.message([{
+          id : 0,
+          value : 'Submission Complete.'
+        }], 'status', formObj, submitter);
+      }
     }
-    /**
- * If redirect, then perform redirect
- */
+    // Redirect
     else {
       window.location.href = '/' + data.redirect;
     }
