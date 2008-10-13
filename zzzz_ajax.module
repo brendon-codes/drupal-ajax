@@ -151,7 +151,7 @@ function zzzz_ajax_validator() {
 
 function zzzz_ajax_out($data) {
   header("Content-Type: application/json; charset=UTF-8");
-  print json_encode($data);
+  print drupal_to_js($data);
   exit;
 }
 
