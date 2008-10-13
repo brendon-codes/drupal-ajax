@@ -129,9 +129,13 @@ function zzzz_ajax_submitter($form, &$form_state) {
   }
   // Display messages internally without redirect
   else {
-    $data['messages'] =
-      drupal_get_messages('status', false) +
-      drupal_get_messages('warning', true);
+    $messages = drupal_get_messages(null, true);
+    if (array_key_exists('status', $messages)) {
+      $data['messages_status'] = $messages['status'];
+    }
+    if (array_key_exists('warning', $messages)) {
+      $data['messages_warning'] = $messages['warning'];
+    }
   }
   $out = zzzz_ajax_buildOutput($data);
   zzzz_ajax_out($out);
@@ -141,7 +145,7 @@ function zzzz_ajax_validator() {
   if (array_key_exists('ajax', $_REQUEST)) {
     drupal_get_messages(null, true);
     $data = zzzz_ajax_buildOutput(array(
-      'errors' => form_get_errors()
+      'messages_error' => form_get_errors()
     ));
     if (!$data['status']) {
       zzzz_ajax_out($data);
@@ -163,27 +167,45 @@ function zzzz_ajax_cleanid($field_id) {
 function zzzz_ajax_buildOutput($data) {
   $out = array(
     'status' => true,
-    'errors' => array(),
-    'redirect' => null,
-    'messages' => array()
+    'messages_error' => array(),
+    'messages_status' => array(),
+    'messages_warning' => array(),
+    'redirect' => null
   );
-  // ERROR
-  if (array_key_exists('errors', $data) && $data['errors'] !== null) {
+  // MESSAGE:ERROR
+  if (array_key_exists('messages_error', $data) &&
+      $data['messages_error'] !== null) {
     $out['status'] = false;
-    foreach ($data['errors'] as $k => $v) {
-      $out['errors'][] = array(
+    foreach ($data['messages_error'] as $k => $v) {
+      $out['messages_error'][] = array(
         'id' => zzzz_ajax_cleanid("edit-" . $k),
-        'error' => $v
+        'value' => $v
+      );
+    }
+  }
+  // MESSAGE:STATUS
+  if (array_key_exists('messages_status', $data) &&
+      $data['messages_status'] !== null) {
+    foreach ($data['messages_status'] as $k => $v) {
+      $out['messages_status'][] = array(
+        'id' => (int)$k,
+        'value' => $v
+      );
+    }
+  }
+  // MESSAGE:WARNING
+  if (array_key_exists('messages_warning', $data) &&
+      $data['messages_warning'] !== null) {
+    foreach ($data['messages_warning'] as $k => $v) {
+      $out['messages_warning'][] = array(
+        'id' => (int)$k,
+        'value' => $v
       );
     }
   }
   // Redirect
   if (array_key_exists('redirect', $data) && $data['redirect'] !== null) {
     $out['redirect'] = $data['redirect'];
-  }
-  // Messages
-  if (array_key_exists('messages', $data) && $data['messages'] !== null) {
-    $out['messages'] = $data['messages'];
   }
   return $out;
 }
