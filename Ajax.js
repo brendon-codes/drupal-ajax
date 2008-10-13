@@ -1,41 +1,41 @@
 /**
- * Ajax form validation
+ * Ajax form validation and submission
  * 
  * @author BrendonC
  */
 
-var AjaxValidation = new Object;
+var Ajax = new Object;
 
-AjaxValidation.conf = {
+Ajax.conf = {
   jquery_ver : '1.2.0'
 }
 
-AjaxValidation.pass = true;
+Ajax.pass = true;
 
-AjaxValidation.preprocess = function() {
+Ajax.preprocess = function() {
   var v, i, _i, j_ver, jq_current_ver, pass;
   jq_current_ver = jQuery.fn.jquery.toString();
   v = jq_current_ver.split('.');
-  j_ver = AjaxValidation.conf.jquery_ver.split('.');
+  j_ver = Ajax.conf.jquery_ver.split('.');
   for (i = 0, _i = j_ver.length; i < _i; i++) {
     if (parseInt(v[i]) < parseInt(j_ver[i])) {
       window.alert(
         "Required minumum jquery version is " +
-        AjaxValidation.conf.jquery_ver + ". The version currently installed " +
+        Ajax.conf.jquery_ver + ". The version currently installed " +
         "is " + jq_current_ver + ". Please follow the instructions " +
         "which were provided with the jQuery Update Module for upgrading " +
         "jQuery. The jQuery Update homepage can be found at " +
         "http://drupal.org/project/jquery_update. Until jQuery is upgraded, " +
         "AJAX validation will not be activated for this form.");
-      AjaxValidation.pass = false;
+      Ajax.pass = false;
     }
   }
 }
 
 
-AjaxValidation.go = function(submitter_) {
+Ajax.go = function(submitter_) {
   var data, loadingBox, formObj, data, submitter, submitterVal, thisForm;
-  if (!AjaxValidation.pass) {
+  if (!Ajax.pass) {
     return false;
   }
   else {
@@ -48,7 +48,7 @@ AjaxValidation.go = function(submitter_) {
       value: submitterVal
     };
     data[data.length] = {
-      name: 'ajax-validation',
+      name: 'ajax',
       value: 1
     };
     submitter.val('Loading...');
@@ -64,7 +64,7 @@ AjaxValidation.go = function(submitter_) {
       dataType: 'json',
       success: function(data){
         submitter.val(submitterVal);
-        AjaxValidation.response(submitter, formObj, data);
+        Ajax.response(submitter, formObj, data);
       }
       
     })
@@ -73,7 +73,7 @@ AjaxValidation.go = function(submitter_) {
 }
 
 
-AjaxValidation.scroller = function(submitter) {
+Ajax.scroller = function(submitter) {
   var scroll_weight, box, found, timer;
   scroll_weight = 100;
   timer = window.setInterval(function() {
@@ -124,7 +124,7 @@ AjaxValidation.scroller = function(submitter) {
 }
 
 
-AjaxValidation.response = function(submitter, formObj, data){
+Ajax.response = function(submitter, formObj, data){
   var i, _i, thisItem, log, errBox, h;
   log = $('<ul>');
   /**
@@ -145,7 +145,7 @@ AjaxValidation.response = function(submitter, formObj, data){
       formObj.prepend(errBox);      
     }
     errBox.html(log);
-    AjaxValidation.scroller(submitter[0]);
+    Ajax.scroller(submitter[0]);
   }
   /**
    * Success
@@ -166,4 +166,4 @@ AjaxValidation.response = function(submitter, formObj, data){
   }
 }
 
-AjaxValidation.preprocess();
+Ajax.preprocess();
