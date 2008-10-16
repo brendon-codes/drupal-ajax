@@ -23,6 +23,7 @@ function zzzz_ajax_menu() {
 function zzzz_ajax_types() {
   return array_merge(
     zzzz_ajax_types_node(),
+    zzzz_ajax_types_webform(),
     zzzz_ajax_types_module());
 }
 
@@ -30,7 +31,7 @@ function zzzz_ajax_types_node() {
   $out = array();
   $types = node_get_types();
   foreach ($types as $k => $v) {
-    $out[$k . '_node_form'] = ucwords('Content Type ' . $v->name);
+    $out[$k . '_node_form'] = ucwords('Content Type: ' . $v->name);
   }
   return $out;
 }
@@ -42,6 +43,22 @@ function zzzz_ajax_types_module() {
     if (preg_match("/^([a-zA-Z0-9_]+?)_submit$/", $f, $func_name)) {
       $out[$func_name[1]] = ucwords(str_replace('_', ' ', $func_name[1]));
     }
+  }
+  return $out;
+}
+
+function zzzz_ajax_types_webform() {
+  $out = array();;
+  $q =
+    'SELECT ' .
+    '  node.nid, ' .
+    '  node.title ' .
+    'FROM node ' .
+    'WHERE node.type = "webform" ';
+  $res = db_query($q);
+  while ($row = db_fetch_array($res)) {
+    $id = 'webform_client_form_' . (int) $row['nid'];
+    $out[$id] = 'Webform: ' . $row['title'];
   }
   return $out;
 }
