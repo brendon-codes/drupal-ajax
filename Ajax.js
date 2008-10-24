@@ -172,7 +172,8 @@ Ajax.response = function(submitter, formObj, data){
     }
     // Redirect
     else {
-      window.location.href = '/' + data.redirect;
+      //console.log(data.redirect);
+      window.location.href = data.redirect;
     }
   }
 }

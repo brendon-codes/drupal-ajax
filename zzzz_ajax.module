@@ -91,6 +91,7 @@ function zzzz_ajax_istype($form_id) {
 
 
 function zzzz_ajax_form_alter(&$form, $form_state, $form_id) {
+  //watchdog('AJAX Forms', 'Form ID: %form_id', array('%form_id'=>$form_id));
   if (zzzz_ajax_isType($form_id)) {
     $found = FALSE;
     zzzz_ajax_setvalidator($form);
@@ -135,11 +136,38 @@ function zzzz_ajax_findsubmitter(&$form, &$found) {
   return true;
 }
 
+/**
+ * Sometimes the redirect can be an array in the form of
+ *   0 => path
+ *   1 => query
+ *   2 => fragment
+ */
+function zzzz_ajax_getredirect($redirect) {
+  //watchdog('AJAX Forms', 'Redirect: !redirect',
+  //  array('!redirect'=>gettype($redirect[1])));
+  $args = array();
+  $args['absolute'] = TRUE;
+  if (is_array($redirect)) {
+    if ($redirect[1] !== NULL) {
+      $args['query'] = $redirect[1];
+    }
+    if ($redirect[2] !== NULL) {
+      $args['fragment'] = $redirect[2];
+    }
+    $path = $redirect[0];
+  }
+  else {
+    $path = $redirect;
+  }
+  return url($path, $args);
+}
+
 function zzzz_ajax_submitter($form, &$form_state) {
   $data = array();
   // Go to redirection page
-  if (array_key_exists('redirect', $form_state) && $form_state['redirect']) {
-    $data['redirect'] = $form_state['redirect'];
+  if (array_key_exists('redirect', $form_state) &&
+      $form_state['redirect'] !== FALSE) {
+    $data['redirect'] = zzzz_ajax_getredirect($form_state['redirect']);
   }
   // Display messages internally without redirect
   else {
