@@ -32,6 +32,12 @@ Ajax.preprocess = function() {
   }
 }
 
+Ajax.tinyMCE = function() {
+  if (window.tinyMCE && window.tinyMCE.triggerSave) {
+    tinyMCE.triggerSave();
+  }
+  return true;
+}
 
 Ajax.go = function(submitter_) {
   var data, loadingBox, formObj, data, submitter, submitterVal, thisForm;
@@ -39,6 +45,7 @@ Ajax.go = function(submitter_) {
     return false;
   }
   else {
+    Ajax.tinyMCE();
     formObj = $(submitter_.form);
     submitter = $(submitter_);
     submitterVal = submitter.val();
@@ -52,10 +59,6 @@ Ajax.go = function(submitter_) {
       value: 1
     };
     submitter.val('Loading...');
-    /**
-     * Eventually we may want to append the submit hidden
-     * field to the form list
-     */
     $.ajax({
       url: formObj[0].getAttribute('action'),
       data: data,
