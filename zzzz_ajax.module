@@ -97,6 +97,7 @@ function zzzz_ajax_form_alter(&$form, $form_state, $form_id) {
     zzzz_ajax_setvalidator($form);
     zzzz_ajax_findsubmitter($form, $found);
     zzzz_ajax_setsubmitter($form, $found);
+    //krumo($form);
   }
   return true;
 }
@@ -115,10 +116,11 @@ function zzzz_ajax_setsubmitter(&$form, $found) {
 function zzzz_ajax_findsubmitter(&$form, &$found) {
   foreach ($form as $form_key => $form_val) {
     if (is_array($form[$form_key])) {
-      //submitter button
-      if (array_key_exists('#type', $form[$form_key]) &&
-          $form[$form_key]['#type'] === 'submit' &&
-          $form_key === 'submit') {
+      //submit or preview button
+      if (
+          (array_key_exists('#type', $form[$form_key]) &&
+          $form[$form_key]['#type'] === 'submit') &&
+          ($form_key === 'submit' || $form_key === 'preview')) {
         $form[$form_key]['#attributes'] =
           array('onclick' => 'return Ajax.go(this);');
         if (array_key_exists('#submit', $form[$form_key]) &&
@@ -162,12 +164,17 @@ function zzzz_ajax_getredirect($redirect) {
   return url($path, $args);
 }
 
-function zzzz_ajax_submitter($form, &$form_state) {
+function zzzz_ajax_submitter(&$form, &$form_state) {
   $data = array();
+  // Node Preview
+  if (array_key_exists('node_preview', $form_state) &&
+      $form_state['node_preview'] !== NULL) {
+    $data['preview'] = $form_state['node_preview'];
+  }
   // Go to redirection page
   if (array_key_exists('redirect', $form_state) &&
-      $form_state['redirect'] !== FALSE) {
-    $data['redirect'] = zzzz_ajax_getredirect($form_state['redirect']);
+      $form_state['redirect'] !== NULL) {
+    $data['redirect'] = $form_state['redirect'];
   }
   // Display messages internally without redirect
   else {
@@ -183,17 +190,72 @@ function zzzz_ajax_submitter($form, &$form_state) {
   zzzz_ajax_out($out);
 }
 
-function zzzz_ajax_validator() {
+function zzzz_ajax_validator(&$form, &$form_state) {
   if (array_key_exists('ajax', $_REQUEST)) {
     drupal_get_messages(NULL, TRUE);
     $data = zzzz_ajax_build(array(
       'messages_error' => form_get_errors()
     ));
+    // Time to send messages
     if (!$data['status']) {
       zzzz_ajax_out($data);
     }
+    // Special exception for the comment forms
+    //elseif ($form['form_id']['#value'] === 'comment_form' &&
+    //    $form['#post']['op'] === t('Preview')) {
+    //  zzzz_ajax_comment_form_preview($form, $form_state);
+    //  $data['preview'] = $form['comment_preview']['#value'];
+    //  zzzz_ajax_out($data);
+    //}
   }
 }
+
+/*
+function zzzz_ajax_comment_form_preview(&$form, &$form_state) {
+  global $user;
+  $edit = $form_state['values'];
+  $output = '';
+  $node = node_load($edit['nid']);
+  _comment_form_submit($edit);
+  $comment = (object)$edit;
+  // Attach the user and time information.
+  if (!empty($edit['author'])) {
+    $account = user_load(array('name' => $edit['author']));
+  }
+  elseif ($user->uid && !isset($edit['is_anonymous'])) {
+    $account = $user;
+  }
+  if (!empty($account)) {
+    $comment->uid = $account->uid;
+    $comment->name = check_plain($account->name);
+  }
+  elseif (empty($comment->name)) {
+    $comment->name = variable_get('anonymous', t('Anonymous'));
+  }
+  $comment->timestamp = !empty($edit['timestamp']) ? $edit['timestamp'] : time();
+  $output .= theme('comment_view', $comment, $node);
+  $form['comment_preview'] = array(
+    '#value' => $output,
+    '#weight' => -100,
+    '#prefix' => '<div class="preview">',
+    '#suffix' => '</div>',
+  );
+  $output = '';
+  if ($edit['pid']) {
+    $comment = db_fetch_object(db_query('SELECT c.*, u.uid, u.name AS registered_name, u.signature, u.picture, u.data FROM {comments} c INNER JOIN {users} u ON c.uid = u.uid WHERE c.cid = %d AND c.status = %d', $edit['pid'], COMMENT_PUBLISHED));
+    $comment = drupal_unpack($comment);
+    $comment->name = $comment->uid ? $comment->registered_name : $comment->name;
+    $output .= theme('comment_view', $comment, $node);
+  }
+  else {
+    $suffix = empty($form['#suffix']) ? '' : $form['#suffix'];
+    $form['#suffix'] = $suffix . node_view($node);
+    $edit['pid'] = 0;
+  }
+  $form['comment_preview_below'] = array('#value' => $output, '#weight' => 100);
+  return TRUE;
+}
+*/
 
 function zzzz_ajax_out($data) {
   header("Content-Type: application/json; charset=UTF-8");
@@ -212,7 +274,8 @@ function zzzz_ajax_build($data) {
     'messages_error' => array(),
     'messages_status' => array(),
     'messages_warning' => array(),
-    'redirect' => NULL
+    'redirect' => NULL,
+    'preview' => NULL
   );
   // MESSAGE:ERROR
   if (array_key_exists('messages_error', $data) &&
@@ -247,7 +310,11 @@ function zzzz_ajax_build($data) {
   }
   // Redirect
   if (array_key_exists('redirect', $data) && $data['redirect'] !== NULL) {
-    $out['redirect'] = $data['redirect'];
+    $out['redirect'] = zzzz_ajax_getredirect($data['redirect']);
+  }
+  // Preview
+  if (array_key_exists('preview', $data) && $data['preview'] !== NULL) {
+    $out['preview'] = rawurlencode($data['preview']);
   }
   return $out;
 }
