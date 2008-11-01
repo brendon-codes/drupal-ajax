@@ -128,25 +128,38 @@ Ajax.scroller = function(submitter) {
 
 Ajax.message = function(messages, type, formObj, submitter) {
   var i, _i, thisItem, log, errBox, h;
-  log = $('<ul>');
-  errBox = $(".messages." + type, formObj[0])
-  for (i = 0, _i = messages.length; i < _i; i++) {
-    thisItem = $('#' + messages[i].id, formObj[0])
-    thisItem.addClass(type);
-    if (messages[i].required) {
-      thisItem.addClass('required');
+  // Cleanups
+  $('.messages, .ajax-preview', formObj).remove();
+  $('input, textarea').removeClass('error status warning required');
+  // Preview
+  if (type === 'preview') {
+    log = $('<div>').addClass('ajax-preview');
+    log.html(messages);
+    formObj.prepend(log);
+  }
+  // Status, Error, Message
+  else {
+    log = $('<ul>');
+    errBox = $(".messages." + type, formObj[0])
+    for (i = 0, _i = messages.length; i < _i; i++) {
+      thisItem = $('#' + messages[i].id, formObj[0])
+      thisItem.addClass(type);
+      if (messages[i].required) {
+        thisItem.addClass('required');
+      }
+      log.append('<li>' + messages[i].value + '</li>');
     }
-    log.append('<li>' + messages[i].value + '</li>');
+    if (errBox.length === 0) {
+      errBox = $("<div class='messages " + type + "'>");
+      formObj.prepend(errBox);
+    }
+    errBox.html(log);
   }
-  if (errBox.length === 0) {
-    errBox = $("<div class='messages " + type + "'>");
-    formObj.prepend(errBox);      
-  }
-  errBox.html(log);
   Ajax.scroller(submitter[0]);
 }
 
 Ajax.response = function(submitter, formObj, data){
+  var newSubmitter;
   /**
    * Failure
    */
@@ -157,8 +170,19 @@ Ajax.response = function(submitter, formObj, data){
    * Success
    */
   else {
+    // Display preview
+    if (data.preview !== null) {
+      Ajax.message(decodeURIComponent(data.preview), 'preview',
+        formObj, submitter);
+      // Sometimes the submit button needs to show up afterwards
+      //if ($('#edit-submit').length === 0) {
+      //  newSubmitter = submitter.clone(true);
+      //  newSubmitter.attr('id', 'edit-submit').val('Submit');
+      //  submitter.before(newSubmitter);
+      //}
+    }
     // If no redirect, then simply show messages
-    if (data.redirect === null) {
+    else if (data.redirect === null) {
       if (data.messages_status.length > 0) {
         Ajax.message(data.messages_status, 'status', formObj, submitter);
       }
