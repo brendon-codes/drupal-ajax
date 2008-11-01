@@ -94,12 +94,25 @@ function zzzz_ajax_form_alter(&$form, $form_state, $form_id) {
   //watchdog('AJAX Forms', 'Form ID: %form_id', array('%form_id'=>$form_id));
   if (zzzz_ajax_isType($form_id)) {
     $found = FALSE;
+    zzzz_ajax_setcommentform($form, $form_id);
     zzzz_ajax_setvalidator($form);
     zzzz_ajax_findsubmitter($form, $found);
     zzzz_ajax_setsubmitter($form, $found);
-    //krumo($form);
   }
+  //print "<pre>";
+  //print_r($form);
+  //print_r("</pre>");
   return true;
+}
+
+function zzzz_ajax_setcommentform(&$form, $form_id) {
+  if ($form_id === 'comment_form') {
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save'),
+      '#weight' => 19
+    );
+  }
 }
 
 
@@ -119,7 +132,8 @@ function zzzz_ajax_findsubmitter(&$form, &$found) {
       //submit or preview button
       if (
           (array_key_exists('#type', $form[$form_key]) &&
-          $form[$form_key]['#type'] === 'submit') &&
+          ($form[$form_key]['#type'] === 'submit' ||
+          $form[$form_key]['#type'] === 'button')) &&
           ($form_key === 'submit' || $form_key === 'preview')) {
         $form[$form_key]['#attributes'] =
           array('onclick' => 'return Ajax.go(this);');
@@ -201,16 +215,15 @@ function zzzz_ajax_validator(&$form, &$form_state) {
       zzzz_ajax_out($data);
     }
     // Special exception for the comment forms
-    //elseif ($form['form_id']['#value'] === 'comment_form' &&
-    //    $form['#post']['op'] === t('Preview')) {
-    //  zzzz_ajax_comment_form_preview($form, $form_state);
-    //  $data['preview'] = $form['comment_preview']['#value'];
-    //  zzzz_ajax_out($data);
-    //}
+    elseif ($form['form_id']['#value'] === 'comment_form' &&
+        $form['#post']['op'] === t('Preview')) {
+      $data['preview'] = zzzz_ajax_comment_form_preview($form, $form_state);
+      zzzz_ajax_out($data);
+    }
   }
 }
 
-/*
+// This function taken from comment_form_add_preview
 function zzzz_ajax_comment_form_preview(&$form, &$form_state) {
   global $user;
   $edit = $form_state['values'];
@@ -232,30 +245,29 @@ function zzzz_ajax_comment_form_preview(&$form, &$form_state) {
   elseif (empty($comment->name)) {
     $comment->name = variable_get('anonymous', t('Anonymous'));
   }
-  $comment->timestamp = !empty($edit['timestamp']) ? $edit['timestamp'] : time();
-  $output .= theme('comment_view', $comment, $node);
-  $form['comment_preview'] = array(
-    '#value' => $output,
-    '#weight' => -100,
-    '#prefix' => '<div class="preview">',
-    '#suffix' => '</div>',
-  );
-  $output = '';
+  $comment->timestamp = !empty($edit['timestamp']) ?
+    $edit['timestamp'] : time();
   if ($edit['pid']) {
-    $comment = db_fetch_object(db_query('SELECT c.*, u.uid, u.name AS registered_name, u.signature, u.picture, u.data FROM {comments} c INNER JOIN {users} u ON c.uid = u.uid WHERE c.cid = %d AND c.status = %d', $edit['pid'], COMMENT_PUBLISHED));
+    $comment = db_fetch_object(db_query(
+      'SELECT c.*, u.uid, u.name AS registered_name, ' .
+      'u.signature, u.picture, u.data FROM {comments} c ' .
+      'INNER JOIN {users} u ON c.uid = u.uid ' .
+      'WHERE c.cid = %d AND c.status = %d',
+      $edit['pid'], COMMENT_PUBLISHED));
     $comment = drupal_unpack($comment);
     $comment->name = $comment->uid ? $comment->registered_name : $comment->name;
-    $output .= theme('comment_view', $comment, $node);
   }
   else {
     $suffix = empty($form['#suffix']) ? '' : $form['#suffix'];
     $form['#suffix'] = $suffix . node_view($node);
     $edit['pid'] = 0;
   }
-  $form['comment_preview_below'] = array('#value' => $output, '#weight' => 100);
-  return TRUE;
+  $output  = '<div class="preview">';
+  $output .= theme('comment_view', $comment, $node);
+  $output .= '</div>';
+  return $output;
 }
-*/
+
 
 function zzzz_ajax_out($data) {
   header("Content-Type: application/json; charset=UTF-8");
