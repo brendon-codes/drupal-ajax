@@ -320,8 +320,12 @@ function zzzz_ajax_build($data) {
       );
     }
   }
-  // Redirect
-  if (array_key_exists('redirect', $data) && $data['redirect'] !== NULL) {
+  // Redirect: Destination Parameter
+  if (array_key_exists('destination', $_GET)) {
+    $out['redirect'] = zzzz_ajax_getredirect($_GET['destination']);
+  }
+  // Redirect: Explicit
+  elseif (array_key_exists('redirect', $data) && $data['redirect'] !== NULL) {
     $out['redirect'] = zzzz_ajax_getredirect($data['redirect']);
   }
   // Preview
