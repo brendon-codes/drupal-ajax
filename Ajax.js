@@ -174,12 +174,6 @@ Ajax.response = function(submitter, formObj, data){
     if (data.preview !== null) {
       Ajax.message(decodeURIComponent(data.preview), 'preview',
         formObj, submitter);
-      // Sometimes the submit button needs to show up afterwards
-      //if ($('#edit-submit').length === 0) {
-      //  newSubmitter = submitter.clone(true);
-      //  newSubmitter.attr('id', 'edit-submit').val('Submit');
-      //  submitter.before(newSubmitter);
-      //}
     }
     // If no redirect, then simply show messages
     else if (data.redirect === null) {
