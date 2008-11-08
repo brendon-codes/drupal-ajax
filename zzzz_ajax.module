@@ -51,10 +51,10 @@ function zzzz_ajax_types_webform() {
   $out = array();;
   $q =
     'SELECT ' .
-    '  node.nid, ' .
-    '  node.title ' .
-    'FROM node ' .
-    'WHERE node.type = "webform" ';
+    '  n.nid, ' .
+    '  n.title ' .
+    'FROM {node} n ' .
+    'WHERE n.type = "webform" ';
   $res = db_query($q);
   while ($row = db_fetch_array($res)) {
     $id = 'webform_client_form_' . (int) $row['nid'];
