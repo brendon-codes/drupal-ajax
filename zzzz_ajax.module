@@ -95,14 +95,69 @@ function zzzz_ajax_form_alter(&$form, $form_state, $form_id) {
   if (zzzz_ajax_isType($form_id)) {
     $found = FALSE;
     zzzz_ajax_setcommentform($form, $form_id);
+    zzzz_ajax_setlt($form);
     zzzz_ajax_setvalidator($form);
     zzzz_ajax_findsubmitter($form, $found);
     zzzz_ajax_setsubmitter($form, $found);
   }
   //print "<pre>";
+  //print_r($form_state);
+  //print "</pre>";
+  //print "<pre>";
   //print_r($form);
-  //print_r("</pre>");
+  //print "</pre>";
   return true;
+}
+
+// Handles a special case for Login Tobaggan redirection
+function zzzz_ajax_setlt(&$form) {
+  global $logintoboggan_denied;
+  if (isset($logintoboggan_denied) && $logintoboggan_denied) {
+    $q = zzzz_ajax_pathinfo($form['#action']);
+    if (!array_key_exists('destination', $q['query'])) {
+      $p = zzzz_ajax_todrupalpath($form['#action']);
+      $q['query']['destination'] = $p;
+      $form['#action'] = url($p, array(
+        'query' => $q['query'],
+        'fragment' => $q['fragment'],
+        'absolute' => FALSE
+      ));
+    }
+  }
+  else {
+    return false;
+  }
+}
+
+// Gets internal path from actual url path
+function zzzz_ajax_todrupalpath($val) {
+  $b = base_path();
+  $bs = sizeof($b);
+  if (substr($val, 0, $bs) === $b) {
+    return substr($val, $bs);
+  }
+  else {
+    return $val;
+  }
+}
+
+function zzzz_ajax_pathinfo($val) {
+  $out = array(
+    'path' => NULL,
+    'query' => array(),
+    'fragment' => NULL
+  );
+  $u = parse_url($val);
+  if (array_key_exists('query', $u)) {
+    parse_str($u, $out['query']);
+  }
+  if (array_key_exists('path', $u)) {
+    $out['path'] = $u['path'];
+  }
+  if (array_key_exists('fragment', $u)) {
+    $out['fragment'] = $u['fragment'];
+  }
+  return $out;
 }
 
 function zzzz_ajax_setcommentform(&$form, $form_id) {
@@ -270,7 +325,8 @@ function zzzz_ajax_comment_form_preview(&$form, &$form_state) {
 
 
 function zzzz_ajax_out($data) {
-  header("Content-Type: application/json; charset=UTF-8");
+  header('HTTP/1.1 200 OK', TRUE);
+  header("Content-Type: application/json; charset=UTF-8", TRUE);
   print drupal_to_js($data);
   exit;
 }
