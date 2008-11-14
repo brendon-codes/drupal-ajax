@@ -158,12 +158,30 @@ Ajax.message = function(messages, type, formObj, submitter) {
   Ajax.scroller(submitter[0]);
 }
 
+Ajax.updater = function(updaters) {
+  var i, _i, elm;
+  for (i = 0, _i = updaters.length; i < _i; i++) {
+    elm = $(updaters[i].selector);
+    if (updaters[i].type === 'html_in') {
+      elm.html(updaters[i].value);
+    }
+    else if (updaters[i].type === 'html_out') {
+      elm.replaceWith(updaters[i].value);
+    }
+    else if (updaters[i].type === 'field') {
+      elm.val(updaters[i].value);
+    }
+  }
+  return true;
+}
+
 Ajax.response = function(submitter, formObj, data){
   var newSubmitter;
   /**
    * Failure
    */
   if (data.status === false) {
+    Ajax.updater(data.updaters);
     Ajax.message(data.messages_error, 'error', formObj, submitter);
   }
   /**

@@ -92,6 +92,7 @@ function zzzz_ajax_istype($form_id) {
 
 function zzzz_ajax_form_alter(&$form, $form_state, $form_id) {
   //watchdog('AJAX Forms', 'Form ID: %form_id', array('%form_id'=>$form_id));
+  //print_r($form);
   if (zzzz_ajax_isType($form_id)) {
     $found = FALSE;
     zzzz_ajax_setcommentform($form, $form_id);
@@ -267,6 +268,7 @@ function zzzz_ajax_validator(&$form, &$form_state) {
     ));
     // Time to send messages
     if (!$data['status']) {
+      zzzz_ajax_getcaptcha($form, $form_state, $data);
       zzzz_ajax_out($data);
     }
     // Special exception for the comment forms
@@ -276,6 +278,41 @@ function zzzz_ajax_validator(&$form, &$form_state) {
       zzzz_ajax_out($data);
     }
   }
+}
+
+// captcha functionality
+function zzzz_ajax_getcaptcha(&$form, &$form_state, &$data) {
+  if (array_key_exists('captcha_token', $form_state['values']) &&
+      array_key_exists('captcha_type', $form_state['values']) &&
+      array_key_exists('captcha_query', $form_state['values'])) {
+    if ($form_state['values']['captcha_type'] === 'math') {
+      $selector =
+        "#edit-captcha-response-wrapper .field-prefix";
+      $type = 'html';
+    }
+    elseif ($form_state['values']['captcha_type'] === 'text') {
+      $selector =
+        "#edit-captcha-response-wrapper label[for='edit-captcha-response']";
+      $type = 'html_in';
+    }
+    elseif ($form_state['values']['captcha_type'] === 'image') {
+      $selector =
+        ".captcha img";
+      $type = 'html_out';
+    }
+    $data['updaters'][] = array(
+      'type' => 'field',
+      'selector' => '#edit-captcha-token',
+      'value' => $form_state['values']['captcha_token']
+    );
+    $data['updaters'][] = array(
+      'type' => $type,
+      'selector' => $selector,
+      'value' => $form_state['values']['captcha_query']
+    );
+  }
+  captcha_pre_render($form);
+  return true;
 }
 
 // This function taken from comment_form_add_preview
@@ -339,6 +376,7 @@ function zzzz_ajax_cleanid($field_id) {
 function zzzz_ajax_build($data) {
   $out = array(
     'status' => true,
+    'updaters' => array(),
     'messages_error' => array(),
     'messages_status' => array(),
     'messages_warning' => array(),
