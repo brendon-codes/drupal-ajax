@@ -310,8 +310,8 @@ function zzzz_ajax_getcaptcha(&$form, &$form_state, &$data) {
       'selector' => $selector,
       'value' => $form_state['values']['captcha_query']
     );
+    captcha_pre_render($form);
   }
-  captcha_pre_render($form);
   return true;
 }
 
