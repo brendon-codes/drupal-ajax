@@ -1,6 +1,7 @@
 <?php
 /**
  * Automatic ajax validation
+ * http://drupal.org/project/ajax
  * Drupal 6
  * @author BrendonC
  *
