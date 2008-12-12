@@ -1,0 +1,41 @@
+Drupal AJAX Forms
+Brendon Crawford
+http://drupal.org/project/ajax
+irc://freenode.net/#drupy
+
+In a nutshell, this module will "Ajaxify" almost any Drupal form, including
+the user login form. It will essentially allow you to validate, preview, and
+save your forms without a page refresh.
+
+By default in Drupal, when a form is submitted, the values of that form are
+sent through a series of Drupal validation procedures. When these validations
+are completed the validation messages are normally sent back to the user with
+a standard page refresh.
+
+For example, if a user fills out a form which requires a first name, but the
+user leaves these fields blank, they will be presented with a message that
+says "First Name is Required".
+
+This module allows the validation messages to be sent back to the user without
+a page refresh, so they appear in realtime. This makes for a more streamlined
+user experience. If the submitted form has no errors, the page will be
+redirected to the appropriate submission landing page.
+
+Configuration is easy. Simply go to "admin/settings/ajax" and select the
+forms for which you want to use AJAX handling.
+
+To test the module, go to one of the forms which you selected. For example if
+you selected "Content Type Blog", then go to "node/add/blog". Then fill out
+the form, intentionally inputting invalid data or leave a required field
+blank. Submit the form. You should then see the validation messages appear at
+the top of the form near-instantaniously.
+
+This module will work out of the box with forms displayed in a Thickbox.
+However, it will only work out of the box with the "AJAX Content" Thickbox,
+NOT the "iFramed Content" Thickbox.
+
+This module will work with the Captcha module (6.x-1.0-rc2), but you must first
+apply a set of patches to the captcha module which are provided in the
+"patches/captcha" directory.
+
+Support for Drupal 5.x has been discontinued.

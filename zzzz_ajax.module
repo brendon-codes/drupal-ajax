@@ -1,14 +1,20 @@
 <?php
 /**
  * Automatic ajax validation
- * http://drupal.org/project/ajax
- * Drupal 6
- * @author BrendonC
  *
+ * @see http://drupal.org/project/ajax
+ * @see irc://freenode.net/#drupy
+ * @depends Drupal 6
+ * @author brendoncrawford
+ * @note This file uses a 79 character width limit.
  *
  */
 
-
+/**
+ * hook_menu
+ *
+ * @return Assoc
+ */
 function zzzz_ajax_menu() {
   $items['admin/settings/ajax'] = array(
     'title' => t('Ajax Forms Settings'),
@@ -21,13 +27,24 @@ function zzzz_ajax_menu() {
   return $items;
 }
 
+/**
+ * Get content types
+ *
+ * @return Assoc
+ */
 function zzzz_ajax_types() {
   return array_merge(
     zzzz_ajax_types_node(),
     zzzz_ajax_types_webform(),
-    zzzz_ajax_types_module());
+    //zzzz_ajax_types_module()
+    zzzz_ajax_types_other());
 }
 
+/**
+ * Get node types
+ *
+ * @return Assoc
+ */
 function zzzz_ajax_types_node() {
   $out = array();
   $types = node_get_types();
@@ -37,6 +54,12 @@ function zzzz_ajax_types_node() {
   return $out;
 }
 
+/**
+ * Get module types.
+ * This function currently unused.
+ *
+ * @return Assoc
+ */
 function zzzz_ajax_types_module() {
   $out = array();
   $funcs = get_defined_functions();
@@ -48,6 +71,26 @@ function zzzz_ajax_types_module() {
   return $out;
 }
 
+/**
+ * Get other default types
+ *
+ * @return Assoc
+ */
+function zzzz_ajax_types_other() {
+  return array(
+    'user_login' => 'User Login',
+    'user_edit' => 'User Edit',
+    'user_register' => 'User Register',
+    'comment_form' => 'Comment Form',
+    'logintoboggan_user_register' => 'Loggin Toboggan User Register'
+  );
+}
+
+/**
+ * Get webform types
+ *
+ * @return Assoc
+ */
 function zzzz_ajax_types_webform() {
   $out = array();;
   $q =
@@ -64,36 +107,95 @@ function zzzz_ajax_types_webform() {
   return $out;
 }
 
+/**
+ * Display admin form
+ *
+ * @return Assoc
+ */
 function zzzz_ajax_admin() {
-  $form = array();
-  $form['ajax_types'] = array(
-    '#type' => 'select',
-    '#multiple' => TRUE,
-    '#options' => zzzz_ajax_types(),
-    '#title' => t('Forms to Use AJAX Submissions'),
-    '#default_value' => variable_get('ajax_types', array()),
-    '#size' => 20,
-    '#description' => t(
-      "Select the forms you wish to use AJAX submissions.")
+  $form = array(
+    'container_default' => array(
+      '#type' => 'fieldset',
+      '#title' => t('Default Forms'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      'ajax_types_default' => array(
+        '#type' => 'select',
+        '#multiple' => TRUE,
+        '#options' => zzzz_ajax_types(),
+        '#default_value' => variable_get('ajax_types_default', array()),
+        '#size' => 20,
+        '#description' => t(
+          "Select the default forms you wish to use AJAX submissions.")
+      )
+    ),
+    'container_custom' => array(
+      '#type' => 'fieldset',
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#title' => t('Custom Forms (Advanced)'),
+      'ajax_types_custom' => array(
+        '#type' => 'textarea',
+        '#default_value' => variable_get('ajax_types_custom', ''),
+        '#description' => t(
+          'Enter the form IDs of the custom forms you wish to ' .
+          'use AJAX Submissions. Enter one ID per line. Only alpha-numeric ' .
+          'characters should be used. ')
+      )
+    )
   );
   return system_settings_form($form);
 }
 
+/**
+ * hook_init
+ *
+ * @return Bool
+ */
 function zzzz_ajax_init() {
   drupal_add_js(drupal_get_path('module', 'zzzz_ajax') .
     '/Ajax.js', 'module');
+  return TRUE;
 }
 
-
+/**
+ * Checks if form is a specified type
+ *
+ * @param $form_id String
+ * @return Bool
+ */
 function zzzz_ajax_istype($form_id) {
-  return array_key_exists($form_id,
-    variable_get('ajax_types', array()));
+  $exists = array_key_exists($form_id,
+    variable_get('ajax_types_default', array()));
+  if ($exists) {
+    return TRUE;
+  }
+  else {
+    $custom = variable_get('ajax_types_custom', FALSE);
+    if ($custom !== FALSE) {
+      $parts = preg_split("/[\r\n]+/", $custom, -1, PREG_SPLIT_NO_EMPTY);
+      if ($parts) {
+        foreach ($parts as $v) {
+          if (trim($v) === $form_id) {
+            return TRUE;
+          }
+        }
+      }
+    }
+    return FALSE;
+  }
 }
 
-
+/**
+ * hook_form_alter
+ *
+ * @param $form Assoc
+ * @param $form_state Assoc
+ * @param $form_id String
+ * @return Bool
+ */
 function zzzz_ajax_form_alter(&$form, $form_state, $form_id) {
   //watchdog('AJAX Forms', 'Form ID: %form_id', array('%form_id'=>$form_id));
-  //print_r($form);
   if (zzzz_ajax_isType($form_id)) {
     $found = FALSE;
     zzzz_ajax_setcommentform($form, $form_id);
@@ -108,10 +210,15 @@ function zzzz_ajax_form_alter(&$form, $form_state, $form_id) {
   //print "<pre>";
   //print_r($form);
   //print "</pre>";
-  return true;
+  return TRUE;
 }
 
-// Handles a special case for Login Tobaggan redirection
+/**
+ * Handles a special case for Login Tobaggan redirection
+ *
+ * @param $form Assoc
+ * @return Bool
+ */
 function zzzz_ajax_setlt(&$form) {
   global $logintoboggan_denied;
   if (isset($logintoboggan_denied) && $logintoboggan_denied) {
@@ -127,11 +234,17 @@ function zzzz_ajax_setlt(&$form) {
     }
   }
   else {
-    return false;
+    return FALSE;
   }
 }
 
-// Gets internal path from actual url path
+/**
+ * Gets internal path from actual url path
+ * This is needed for captcha forms
+ *
+ * @param $val String
+ * @return String
+ */
 function zzzz_ajax_todrupalpath($val) {
   $b = base_path();
   $bs = sizeof($b);
@@ -143,6 +256,12 @@ function zzzz_ajax_todrupalpath($val) {
   }
 }
 
+/**
+ * Collects path info
+ *
+ * @param $val String
+ * @return Assoc
+ */
 function zzzz_ajax_pathinfo($val) {
   $out = array(
     'path' => NULL,
@@ -162,6 +281,13 @@ function zzzz_ajax_pathinfo($val) {
   return $out;
 }
 
+/**
+ * Enables the comment form
+ *
+ * @param $form Assoc
+ * @param $form_id String
+ * @return Bool
+ */
 function zzzz_ajax_setcommentform(&$form, $form_id) {
   if ($form_id === 'comment_form') {
     $form['submit'] = array(
@@ -170,19 +296,41 @@ function zzzz_ajax_setcommentform(&$form, $form_id) {
       '#weight' => 19
     );
   }
+  return TRUE;
 }
 
-
+/**
+ * Sets the validator
+ *
+ * @param $form Assoc
+ * @return Bool
+ */
 function zzzz_ajax_setvalidator(&$form) {
   $form['#validate'][] = 'zzzz_ajax_validator';
+  return TRUE;
 }
 
+/**
+ * Sets the submitter
+ *
+ * @param $form Assoc
+ * @param $found Bool
+ * @return Bool
+ */
 function zzzz_ajax_setsubmitter(&$form, $found) {
   if (!$found) {
     $form['#submit'][] = 'zzzz_ajax_submitter';
   }
+  return TRUE;
 }
 
+/**
+ * Finds the submitter
+ *
+ * @param $form Assoc
+ * @param $found Bool
+ * @return Bool
+ */
 function zzzz_ajax_findsubmitter(&$form, &$found) {
   foreach ($form as $form_key => $form_val) {
     if (is_array($form[$form_key])) {
@@ -206,14 +354,18 @@ function zzzz_ajax_findsubmitter(&$form, &$found) {
       }
     }
   }
-  return true;
+  return TRUE;
 }
 
 /**
+ * Gets redirect
  * Sometimes the redirect can be an array in the form of
  *   0 => path
  *   1 => query
  *   2 => fragment
+ *
+ * @param $redirect String|Array
+ * @return String
  */
 function zzzz_ajax_getredirect($redirect) {
   //watchdog('AJAX Forms', 'Redirect: !redirect',
@@ -235,6 +387,13 @@ function zzzz_ajax_getredirect($redirect) {
   return url($path, $args);
 }
 
+/**
+ * Submission handler callback
+ *
+ * @param $form Assoc
+ * @param $form_state Assoc
+ * @return Bool
+ */
 function zzzz_ajax_submitter(&$form, &$form_state) {
   $data = array();
   // Node Preview
@@ -259,8 +418,16 @@ function zzzz_ajax_submitter(&$form, &$form_state) {
   }
   $out = zzzz_ajax_build($data);
   zzzz_ajax_out($out);
+  return TRUE;
 }
 
+/**
+ * Validation handler callback
+ *
+ * @param $form Assoc
+ * @param $form_state Assoc
+ * @return Bool
+ */
 function zzzz_ajax_validator(&$form, &$form_state) {
   if (array_key_exists('ajax', $_REQUEST)) {
     drupal_get_messages(NULL, TRUE);
@@ -279,9 +446,18 @@ function zzzz_ajax_validator(&$form, &$form_state) {
       zzzz_ajax_out($data);
     }
   }
+  return TRUE;
 }
 
-// captcha functionality
+/**
+ * Captcha functionality
+ * This depends on the provided captcha patches
+ *
+ * @param $form Assoc
+ * @param $form_state Assoc
+ * @param $data Assoc
+ * @return Bool
+ */
 function zzzz_ajax_getcaptcha(&$form, &$form_state, &$data) {
   if (array_key_exists('captcha_token', $form_state['values']) &&
       array_key_exists('captcha_type', $form_state['values']) &&
@@ -313,10 +489,17 @@ function zzzz_ajax_getcaptcha(&$form, &$form_state, &$data) {
     );
     captcha_pre_render($form);
   }
-  return true;
+  return TRUE;
 }
 
-// This function taken from comment_form_add_preview
+/**
+ * Grabs comment preview.
+ * This function taken from comment_form_add_preview
+ *
+ * @param $form Assoc
+ * @param $form_state Assoc
+ * @return String
+ */
 function zzzz_ajax_comment_form_preview(&$form, &$form_state) {
   global $user;
   $edit = $form_state['values'];
@@ -361,7 +544,12 @@ function zzzz_ajax_comment_form_preview(&$form, &$form_state) {
   return $output;
 }
 
-
+/**
+ * Outputs data
+ *
+ * @param $data String
+ * @return Exit
+ */
 function zzzz_ajax_out($data) {
   header('HTTP/1.1 200 OK', TRUE);
   header("Content-Type: application/json; charset=UTF-8", TRUE);
@@ -369,11 +557,23 @@ function zzzz_ajax_out($data) {
   exit;
 }
 
+/**
+ * Gets a clean element id
+ * taken from form_clean_id
+ *
+ * @param $field_id String
+ * @return String
+ */
 function zzzz_ajax_cleanid($field_id) {
-  //taken from form_clean_id
   return str_replace(array('][', '_', ' '), '-', $field_id);
 }
 
+/**
+ * Builds the output object
+ *
+ * @param $data Assoc
+ * @return Assoc
+ */
 function zzzz_ajax_build($data) {
   $out = array(
     'status' => true,

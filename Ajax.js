@@ -1,7 +1,12 @@
 /**
- * Ajax form validation and submission
- * 
- * @author BrendonC
+ * Automatic ajax validation
+ *
+ * @see http://drupal.org/project/ajax
+ * @see irc://freenode.net/#drupy
+ * @depends Drupal 6
+ * @author brendoncrawford
+ * @note This file uses a 79 character width limit.
+ *
  */
 
 var Ajax = new Object;
@@ -12,6 +17,11 @@ Ajax.conf = {
 
 Ajax.pass = true;
 
+/**
+ * Preprocessor
+ * 
+ * @return {Bool}
+ */
 Ajax.preprocess = function() {
   var v, i, _i, j_ver, jq_current_ver, pass;
   jq_current_ver = jQuery.fn.jquery.toString();
@@ -30,8 +40,14 @@ Ajax.preprocess = function() {
       Ajax.pass = false;
     }
   }
+  return true;
 }
 
+/**
+ * TinyMCE Trigger
+ * 
+ * @return {Bool}
+ */
 Ajax.tinyMCE = function() {
   if (window.tinyMCE && window.tinyMCE.triggerSave) {
     tinyMCE.triggerSave();
@@ -39,6 +55,12 @@ Ajax.tinyMCE = function() {
   return true;
 }
 
+/**
+ * Handles submission
+ * 
+ * @param {Object} submitter_
+ * @return {Bool}
+ */
 Ajax.go = function(submitter_) {
   var data, loadingBox, formObj, data, submitter, submitterVal, thisForm;
   if (!Ajax.pass) {
@@ -75,7 +97,12 @@ Ajax.go = function(submitter_) {
   }
 }
 
-
+/**
+ * Handles scroller
+ * 
+ * @param {Object} submitter
+ * @return {Bool}
+ */
 Ajax.scroller = function(submitter) {
   var scroll_weight, box, found, timer;
   scroll_weight = 100;
@@ -124,8 +151,18 @@ Ajax.scroller = function(submitter) {
     }
     return true;
   }, 100);
+  return true;
 }
 
+/**
+ * Handles return message
+ * 
+ * @param {Object} messages
+ * @param {Object} type
+ * @param {Object} formObj
+ * @param {Object} submitter
+ * @return {Bool}
+ */
 Ajax.message = function(messages, type, formObj, submitter) {
   var i, _i, thisItem, log, errBox, h;
   // Cleanups
@@ -156,8 +193,15 @@ Ajax.message = function(messages, type, formObj, submitter) {
     errBox.html(log);
   }
   Ajax.scroller(submitter[0]);
+  return true;
 }
 
+/**
+ * Updates message containers
+ * 
+ * @param {Object} updaters
+ * @return {Bool}
+ */
 Ajax.updater = function(updaters) {
   var i, _i, elm;
   for (i = 0, _i = updaters.length; i < _i; i++) {
@@ -175,6 +219,14 @@ Ajax.updater = function(updaters) {
   return true;
 }
 
+/**
+ * Handles data response
+ * 
+ * @param {Object} submitter
+ * @param {Object} formObj
+ * @param {Object} data
+ * @return {Bool}
+ */
 Ajax.response = function(submitter, formObj, data){
   var newSubmitter;
   /**
@@ -215,6 +267,7 @@ Ajax.response = function(submitter, formObj, data){
       window.location.href = data.redirect;
     }
   }
+  return true;
 }
 
 Ajax.preprocess();
