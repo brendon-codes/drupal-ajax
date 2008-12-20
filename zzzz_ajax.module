@@ -462,33 +462,49 @@ function zzzz_ajax_getcaptcha(&$form, &$form_state, &$data) {
   if (array_key_exists('captcha_token', $form_state['values']) &&
       array_key_exists('captcha_type', $form_state['values']) &&
       array_key_exists('captcha_query', $form_state['values'])) {
-    //print "YES";
-    if ($form_state['values']['captcha_type'] === 'math') {
-      $selector =
-        "#edit-captcha-response-wrapper .field-prefix";
-      $type = 'html_in';
+    // COnditional show
+    if (_captcha_persistence_skip($form['form_id']['#value'])) {
+      $data['updaters'][] = array(
+          'type' => 'remove',
+          'selector' => 'fieldset.captcha',
+          'value' => NULL
+      );
     }
-    elseif ($form_state['values']['captcha_type'] === 'text') {
-      $selector =
-        "#edit-captcha-response-wrapper label[for='edit-captcha-response']";
-      $type = 'html_in';
+    // ALways Show
+    else {
+      // MATH
+      if ($form_state['values']['captcha_type'] === 'math') {
+        $selector =
+          "#edit-captcha-response-wrapper .field-prefix";
+        $type = 'html_in';
+      }
+      elseif ($form_state['values']['captcha_type'] === 'text') {
+        $selector =
+          "#edit-captcha-response-wrapper label[for='edit-captcha-response']";
+        $type = 'html_in';
+      }
+      elseif ($form_state['values']['captcha_type'] === 'image') {
+        $selector =
+          ".captcha img";
+        $type = 'html_out';
+      }
+      $data['updaters'][] = array(
+        'type' => 'field',
+        'selector' => '#edit-captcha-token',
+        'value' => $form_state['values']['captcha_token']
+      );
+      $data['updaters'][] = array(
+        'type' => $type,
+        'selector' => $selector,
+        'value' => $form_state['values']['captcha_query']
+      );
+      $data['updaters'][] = array(
+        'type' => 'field',
+        'selector' => '#edit-captcha-response',
+        'value' => ''
+      );
+      captcha_pre_render($form);
     }
-    elseif ($form_state['values']['captcha_type'] === 'image') {
-      $selector =
-        ".captcha img";
-      $type = 'html_out';
-    }
-    $data['updaters'][] = array(
-      'type' => 'field',
-      'selector' => '#edit-captcha-token',
-      'value' => $form_state['values']['captcha_token']
-    );
-    $data['updaters'][] = array(
-      'type' => $type,
-      'selector' => $selector,
-      'value' => $form_state['values']['captcha_query']
-    );
-    captcha_pre_render($form);
   }
   return TRUE;
 }
@@ -579,6 +595,7 @@ function zzzz_ajax_build($data) {
   $out = array(
     'status' => true,
     'updaters' => array(),
+    'debug' => array(),
     'messages_error' => array(),
     'messages_status' => array(),
     'messages_warning' => array(),
@@ -627,6 +644,10 @@ function zzzz_ajax_build($data) {
   // Preview
   if (array_key_exists('preview', $data) && $data['preview'] !== NULL) {
     $out['preview'] = rawurlencode($data['preview']);
+  }
+  // Debug
+  if (array_key_exists('debug', $data) && $data['debug'] !== NULL) {
+    $out['debug'] = $data['debug'];
   }
   return $out;
 }

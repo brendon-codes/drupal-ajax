@@ -206,14 +206,21 @@ Ajax.updater = function(updaters) {
   var i, _i, elm;
   for (i = 0, _i = updaters.length; i < _i; i++) {
     elm = $(updaters[i].selector);
+    // HTML:IN
     if (updaters[i].type === 'html_in') {
       elm.html(updaters[i].value);
     }
+    // HTML:OUT
     else if (updaters[i].type === 'html_out') {
       elm.replaceWith(updaters[i].value);
     }
+    // FIELD
     else if (updaters[i].type === 'field') {
       elm.val(updaters[i].value);
+    }
+    // REMOVE
+    else if(updaters[i].type === 'remove') {
+      elm.remove();
     }
   }
   return true;
