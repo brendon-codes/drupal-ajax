@@ -143,28 +143,36 @@ function ajax_init() {
 /**
  * Checks if form is a specified type
  *
+ * @param $form Assoc
  * @param $form_id String
  * @return Bool
  */
-function ajax_is_type($form_id) {
-  $exists = array_key_exists($form_id,
-    variable_get('ajax_types_default', array()));
-  if ($exists) {
+function ajax_is_type($form, $form_id) {
+  // Module defined forms
+  if (array_key_exists('#ajax', $form) && $form['#ajax']) {
     return TRUE;
   }
+  // User defined forms
   else {
-    $custom = variable_get('ajax_types_custom', FALSE);
-    if ($custom !== FALSE) {
-      $parts = preg_split("/[\r\n]+/", $custom, -1, PREG_SPLIT_NO_EMPTY);
-      if ($parts) {
-        foreach ($parts as $v) {
-          if (trim($v) === $form_id) {
-            return TRUE;
+    $exists = array_key_exists($form_id,
+      variable_get('ajax_types_default', array()));
+    if ($exists) {
+      return TRUE;
+    }
+    else {
+      $custom = variable_get('ajax_types_custom', FALSE);
+      if ($custom !== FALSE) {
+        $parts = preg_split("/[\r\n]+/", $custom, -1, PREG_SPLIT_NO_EMPTY);
+        if ($parts) {
+          foreach ($parts as $v) {
+            if (trim($v) === $form_id) {
+              return TRUE;
+            }
           }
         }
       }
+      return FALSE;
     }
-    return FALSE;
   }
 }
 
@@ -178,7 +186,7 @@ function ajax_is_type($form_id) {
  */
 function ajax_form_alter(&$form, $form_state, $form_id) {
   //watchdog('AJAX Forms', 'Form ID: %form_id', array('%form_id'=>$form_id));
-  if (ajax_is_type($form_id)) {
+  if (ajax_is_type($form, $form_id)) {
     $found = FALSE;
     ajax_invoke('ajax_alter', $form, $form_id);
     ajax_validator_set($form);
