@@ -1,6 +1,6 @@
 <?php
 /**
- * AJAX LoginTobbogan Plugin
+ * AJAX LoginToboggan Plugin
  *
  * @see http://drupal.org/project/ajax
  * @see irc://freenode.net/#drupy
@@ -11,17 +11,17 @@
  */
 
 /**
- * Handles a special case for Login Tobaggan redirection
+ * Handles a special case for Login Toboggan redirection
  *
  * @param $form Assoc
  * @return Bool
  */
-function ajax_logintobbogan_ajax_alter(&$form, $form_id) {
+function ajax_logintoboggan_ajax_alter(&$form, $form_id) {
   global $logintoboggan_denied;
   if (isset($logintoboggan_denied) && $logintoboggan_denied) {
-    $q = zzzz_ajax_pathinfo($form['#action']);
+    $q = ajax_pathinfo($form['#action']);
     if (!array_key_exists('destination', $q['query'])) {
-      $p = zzzz_ajax_todrupalpath($form['#action']);
+      $p = ajax_todrupalpath($form['#action']);
       $q['query']['destination'] = $p;
       $form['#action'] = url($p, array(
         'query' => $q['query'],
