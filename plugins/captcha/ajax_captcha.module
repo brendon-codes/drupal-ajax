@@ -10,6 +10,19 @@
  *
  */
 
+/**
+ * validation fail hook
+ *
+ * @param $form Assoc
+ * @param $form_state Assoc
+ * @param $data Assoc
+ * @return Bool
+ */
+function ajax_captcha_validation_fail(&$form, &$form_state, &$data) {
+  ajax_captcha_process($form, $form_state, $data);
+  return TRUE;
+}
+
 
 /**
  * Captcha functionality
@@ -20,7 +33,7 @@
  * @param $data Assoc
  * @return Bool
  */
-function ajax_captcha_ajax_validate_fail(&$form, &$form_state, &$data) {
+function ajax_captcha_process(&$form, &$form_state, &$data) {
   if (array_key_exists('captcha_token', $form_state['values']) &&
       array_key_exists('captcha_type', $form_state['values']) &&
       array_key_exists('captcha_query', $form_state['values'])) {

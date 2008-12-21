@@ -148,7 +148,7 @@ function ajax_init() {
  * @param $form_id String
  * @return Bool
  */
-function ajax_istype($form_id) {
+function ajax_is_type($form_id) {
   $exists = array_key_exists($form_id,
     variable_get('ajax_types_default', array()));
   if ($exists) {
@@ -180,12 +180,12 @@ function ajax_istype($form_id) {
  */
 function ajax_form_alter(&$form, $form_state, $form_id) {
   //watchdog('AJAX Forms', 'Form ID: %form_id', array('%form_id'=>$form_id));
-  if (ajax_isType($form_id)) {
+  if (ajax_is_type($form_id)) {
     $found = FALSE;
     ajax_invoke('ajax_alter', $form, $form_id);
-    ajax_setvalidator($form);
-    ajax_findsubmitter($form, $found);
-    ajax_setsubmitter($form, $found);
+    ajax_validator_set($form);
+    ajax_submitter_find($form, $found);
+    ajax_submitter_set($form, $found);
   }
   return TRUE;
 }
@@ -196,7 +196,7 @@ function ajax_form_alter(&$form, $form_state, $form_id) {
  * @param $val String
  * @return String
  */
-function ajax_todrupalpath($val) {
+function ajax_drupal_path($val) {
   $b = base_path();
   $bs = sizeof($b);
   if (substr($val, 0, $bs) === $b) {
@@ -213,7 +213,7 @@ function ajax_todrupalpath($val) {
  * @param $val String
  * @return Assoc
  */
-function ajax_pathinfo($val) {
+function ajax_path_info($val) {
   $out = array(
     'path' => NULL,
     'query' => array(),
@@ -238,7 +238,7 @@ function ajax_pathinfo($val) {
  * @param $form Assoc
  * @return Bool
  */
-function ajax_setvalidator(&$form) {
+function ajax_validator_set(&$form) {
   $form['#validate'][] = 'ajax_validator';
   return TRUE;
 }
@@ -250,7 +250,7 @@ function ajax_setvalidator(&$form) {
  * @param $found Bool
  * @return Bool
  */
-function ajax_setsubmitter(&$form, $found) {
+function ajax_submitter_set(&$form, $found) {
   if (!$found) {
     $form['#submit'][] = 'ajax_submitter';
   }
@@ -264,7 +264,7 @@ function ajax_setsubmitter(&$form, $found) {
  * @param $found Bool
  * @return Bool
  */
-function ajax_findsubmitter(&$form, &$found) {
+function ajax_submitter_find(&$form, &$found) {
   foreach ($form as $form_key => $form_val) {
     if (is_array($form[$form_key])) {
       //submit or preview button
@@ -283,7 +283,7 @@ function ajax_findsubmitter(&$form, &$found) {
       }
       //nested
       else {
-        ajax_findsubmitter($form[$form_key], $found);
+        ajax_submitter_find($form[$form_key], $found);
       }
     }
   }
@@ -300,7 +300,7 @@ function ajax_findsubmitter(&$form, &$found) {
  * @param $redirect String|Array
  * @return String
  */
-function ajax_getredirect($redirect) {
+function ajax_get_redirect($redirect) {
   //watchdog('AJAX Forms', 'Redirect: !redirect',
   //  array('!redirect'=>gettype($redirect[1])));
   $args = array();
@@ -420,7 +420,7 @@ function ajax_out($data) {
  * @param $field_id String
  * @return String
  */
-function ajax_cleanid($field_id) {
+function ajax_clean_id($field_id) {
   return str_replace(array('][', '_', ' '), '-', $field_id);
 }
 
@@ -447,7 +447,7 @@ function ajax_build($data) {
     $out['status'] = FALSE;
     foreach ($data['messages_error'] as $k => $v) {
       $out['messages_error'][] = array(
-        'id' => ajax_cleanid("edit-" . $k),
+        'id' => ajax_clean_id("edit-" . $k),
         'value' => $v
       );
     }
@@ -474,11 +474,11 @@ function ajax_build($data) {
   }
   // Redirect: Destination Parameter
   if (array_key_exists('destination', $_GET)) {
-    $out['redirect'] = ajax_getredirect($_GET['destination']);
+    $out['redirect'] = ajax_get_redirect($_GET['destination']);
   }
   // Redirect: Explicit
   elseif (array_key_exists('redirect', $data) && $data['redirect'] !== NULL) {
-    $out['redirect'] = ajax_getredirect($data['redirect']);
+    $out['redirect'] = ajax_get_redirect($data['redirect']);
   }
   // Preview
   if (array_key_exists('preview', $data) && $data['preview'] !== NULL) {
