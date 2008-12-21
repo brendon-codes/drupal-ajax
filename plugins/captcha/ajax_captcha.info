@@ -1,0 +1,5 @@
+name = AJAX CAPTCHA Plugin
+description = Plugin to enable ajax functionality with CAPTCHA-enabled forms
+package = ZZZZ AJAX Forms
+core = 6.x
+

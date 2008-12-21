@@ -7,6 +7,11 @@
  * @depends Drupal 6
  * @author brendoncrawford
  * @note This file uses a 79 character width limit.
+ * @note Available hooks are:
+ *   hook_ajax_validate_fail
+ *   hook_ajax_validate_cleanup
+ *   hook_ajax_types
+ *   hook_ajax_alter
  *
  */
 
@@ -33,11 +38,12 @@ function zzzz_ajax_menu() {
  * @return Assoc
  */
 function zzzz_ajax_types() {
-  return array_merge(
+  $types = array_merge(
     zzzz_ajax_types_node(),
-    zzzz_ajax_types_webform(),
     //zzzz_ajax_types_module()
     zzzz_ajax_types_other());
+  zzzz_ajax_invoke('ajax_types', $types);
+  return $types;
 }
 
 /**
@@ -78,33 +84,11 @@ function zzzz_ajax_types_module() {
  */
 function zzzz_ajax_types_other() {
   return array(
-    'user_login' => 'User Login',
-    'user_edit' => 'User Edit',
-    'user_register' => 'User Register',
-    'comment_form' => 'Comment Form',
-    'logintoboggan_user_register' => 'Loggin Toboggan User Register'
+    'user_login' => t('User Login'),
+    'user_edit' => t('User Edit'),
+    'user_register' => t('User Register'),
+    'logintoboggan_user_register' => t('Loggin Toboggan User Register')
   );
-}
-
-/**
- * Get webform types
- *
- * @return Assoc
- */
-function zzzz_ajax_types_webform() {
-  $out = array();;
-  $q =
-    'SELECT ' .
-    '  n.nid, ' .
-    '  n.title ' .
-    'FROM {node} n ' .
-    'WHERE n.type = "webform" ';
-  $res = db_query($q);
-  while ($row = db_fetch_array($res)) {
-    $id = 'webform_client_form_' . (int) $row['nid'];
-    $out[$id] = 'Webform: ' . $row['title'];
-  }
-  return $out;
 }
 
 /**
@@ -198,49 +182,16 @@ function zzzz_ajax_form_alter(&$form, $form_state, $form_id) {
   //watchdog('AJAX Forms', 'Form ID: %form_id', array('%form_id'=>$form_id));
   if (zzzz_ajax_isType($form_id)) {
     $found = FALSE;
-    zzzz_ajax_setcommentform($form, $form_id);
-    zzzz_ajax_setlt($form);
+    zzzz_ajax_invoke('ajax_alter', $form, $form_id);
     zzzz_ajax_setvalidator($form);
     zzzz_ajax_findsubmitter($form, $found);
     zzzz_ajax_setsubmitter($form, $found);
   }
-  //print "<pre>";
-  //print_r($form_state);
-  //print "</pre>";
-  //print "<pre>";
-  //print_r($form);
-  //print "</pre>";
   return TRUE;
 }
 
 /**
- * Handles a special case for Login Tobaggan redirection
- *
- * @param $form Assoc
- * @return Bool
- */
-function zzzz_ajax_setlt(&$form) {
-  global $logintoboggan_denied;
-  if (isset($logintoboggan_denied) && $logintoboggan_denied) {
-    $q = zzzz_ajax_pathinfo($form['#action']);
-    if (!array_key_exists('destination', $q['query'])) {
-      $p = zzzz_ajax_todrupalpath($form['#action']);
-      $q['query']['destination'] = $p;
-      $form['#action'] = url($p, array(
-        'query' => $q['query'],
-        'fragment' => $q['fragment'],
-        'absolute' => FALSE
-      ));
-    }
-  }
-  else {
-    return FALSE;
-  }
-}
-
-/**
  * Gets internal path from actual url path
- * This is needed for captcha forms
  *
  * @param $val String
  * @return String
@@ -279,24 +230,6 @@ function zzzz_ajax_pathinfo($val) {
     $out['fragment'] = $u['fragment'];
   }
   return $out;
-}
-
-/**
- * Enables the comment form
- *
- * @param $form Assoc
- * @param $form_id String
- * @return Bool
- */
-function zzzz_ajax_setcommentform(&$form, $form_id) {
-  if ($form_id === 'comment_form') {
-    $form['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Save'),
-      '#weight' => 19
-    );
-  }
-  return TRUE;
 }
 
 /**
@@ -422,6 +355,22 @@ function zzzz_ajax_submitter(&$form, &$form_state) {
 }
 
 /**
+ * Invokes hooks
+ *
+ * @param unknown_type $view_name
+ * @param unknown_type $display_id
+ * @param unknown_type $out
+ * @return unknown
+ */
+function zzzz_ajax_invoke($hook, &$p1=NULL, &$p2=NULL, &$p3=NULL, &$p4=NULL) {
+  foreach (module_implements($hook) as $name) {
+    $function = $name . '_' . $hook;
+    $result = $function($p1, $p2, $p3, $p4);
+  }
+  return TRUE;
+}
+
+/**
  * Validation handler callback
  *
  * @param $form Assoc
@@ -436,129 +385,19 @@ function zzzz_ajax_validator(&$form, &$form_state) {
     ));
     // Time to send messages
     if (!$data['status']) {
-      zzzz_ajax_getcaptcha($form, $form_state, $data);
+      zzzz_ajax_invoke('ajax_validate_fail', $form, $form_state, $data);
       zzzz_ajax_out($data);
     }
-    // Special exception for the comment forms
-    elseif ($form['form_id']['#value'] === 'comment_form' &&
-        $form['#post']['op'] === t('Preview')) {
-      $data['preview'] = zzzz_ajax_comment_form_preview($form, $form_state);
-      zzzz_ajax_out($data);
-    }
-  }
-  return TRUE;
-}
-
-/**
- * Captcha functionality
- * This depends on the provided captcha patches
- *
- * @param $form Assoc
- * @param $form_state Assoc
- * @param $data Assoc
- * @return Bool
- */
-function zzzz_ajax_getcaptcha(&$form, &$form_state, &$data) {
-  if (array_key_exists('captcha_token', $form_state['values']) &&
-      array_key_exists('captcha_type', $form_state['values']) &&
-      array_key_exists('captcha_query', $form_state['values'])) {
-    // COnditional show
-    if (_captcha_persistence_skip($form['form_id']['#value'])) {
-      $data['updaters'][] = array(
-          'type' => 'remove',
-          'selector' => 'fieldset.captcha',
-          'value' => NULL
-      );
-    }
-    // ALways Show
+    // Validate cleanup
     else {
-      // MATH
-      if ($form_state['values']['captcha_type'] === 'math') {
-        $selector =
-          "#edit-captcha-response-wrapper .field-prefix";
-        $type = 'html_in';
+      $pass = TRUE;
+      zzzz_ajax_invoke('ajax_validate_cleanup', $form, $form_state, $data, $pass);
+      if (!$pass) {
+        zzzz_ajax_out($data);
       }
-      elseif ($form_state['values']['captcha_type'] === 'text') {
-        $selector =
-          "#edit-captcha-response-wrapper label[for='edit-captcha-response']";
-        $type = 'html_in';
-      }
-      elseif ($form_state['values']['captcha_type'] === 'image') {
-        $selector =
-          ".captcha img";
-        $type = 'html_out';
-      }
-      $data['updaters'][] = array(
-        'type' => 'field',
-        'selector' => '#edit-captcha-token',
-        'value' => $form_state['values']['captcha_token']
-      );
-      $data['updaters'][] = array(
-        'type' => $type,
-        'selector' => $selector,
-        'value' => $form_state['values']['captcha_query']
-      );
-      $data['updaters'][] = array(
-        'type' => 'field',
-        'selector' => '#edit-captcha-response',
-        'value' => ''
-      );
-      captcha_pre_render($form);
     }
   }
   return TRUE;
-}
-
-/**
- * Grabs comment preview.
- * This function taken from comment_form_add_preview
- *
- * @param $form Assoc
- * @param $form_state Assoc
- * @return String
- */
-function zzzz_ajax_comment_form_preview(&$form, &$form_state) {
-  global $user;
-  $edit = $form_state['values'];
-  $output = '';
-  $node = node_load($edit['nid']);
-  _comment_form_submit($edit);
-  $comment = (object)$edit;
-  // Attach the user and time information.
-  if (!empty($edit['author'])) {
-    $account = user_load(array('name' => $edit['author']));
-  }
-  elseif ($user->uid && !isset($edit['is_anonymous'])) {
-    $account = $user;
-  }
-  if (!empty($account)) {
-    $comment->uid = $account->uid;
-    $comment->name = check_plain($account->name);
-  }
-  elseif (empty($comment->name)) {
-    $comment->name = variable_get('anonymous', t('Anonymous'));
-  }
-  $comment->timestamp = !empty($edit['timestamp']) ?
-    $edit['timestamp'] : time();
-  if ($edit['pid']) {
-    $comment = db_fetch_object(db_query(
-      'SELECT c.*, u.uid, u.name AS registered_name, ' .
-      'u.signature, u.picture, u.data FROM {comments} c ' .
-      'INNER JOIN {users} u ON c.uid = u.uid ' .
-      'WHERE c.cid = %d AND c.status = %d',
-      $edit['pid'], COMMENT_PUBLISHED));
-    $comment = drupal_unpack($comment);
-    $comment->name = $comment->uid ? $comment->registered_name : $comment->name;
-  }
-  else {
-    $suffix = empty($form['#suffix']) ? '' : $form['#suffix'];
-    $form['#suffix'] = $suffix . node_view($node);
-    $edit['pid'] = 0;
-  }
-  $output  = '<div class="preview">';
-  $output .= theme('comment_view', $comment, $node);
-  $output .= '</div>';
-  return $output;
 }
 
 /**

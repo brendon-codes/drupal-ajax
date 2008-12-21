@@ -1,0 +1,5 @@
+name = AJAX Webform Plugin
+description = Plugin to enable ajax functionality with webform forms
+package = ZZZZ AJAX Forms
+core = 6.x
+
