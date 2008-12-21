@@ -11,6 +11,18 @@
  */
 
 /**
+ * Gets ajax types
+ *
+ * @param $types Assoc
+ * @return Bool
+ *
+ */
+function ajax_logintoboggan_ajax_types(&$types) {
+  $types['logintoboggan_user_register'] = t('Loggin Toboggan User Register');
+  return TRUE;
+}
+
+/**
  * Handles a special case for Login Toboggan redirection
  *
  * @param $form Assoc
