@@ -40,8 +40,7 @@ function ajax_menu() {
 function ajax_get_types() {
   $types = array_merge(
     ajax_types_node(),
-    //ajax_types_module()
-    ajax_types_other());
+    ajax_types_user());
   ajax_invoke('ajax_types', $types);
   return $types;
 }
@@ -82,12 +81,11 @@ function ajax_types_module() {
  *
  * @return Assoc
  */
-function ajax_types_other() {
+function ajax_types_user() {
   return array(
     'user_login' => t('User Login'),
     'user_edit' => t('User Edit'),
-    'user_register' => t('User Register'),
-    'logintoboggan_user_register' => t('Loggin Toboggan User Register')
+    'user_register' => t('User Register')
   );
 }
 
