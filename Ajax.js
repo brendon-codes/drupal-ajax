@@ -249,6 +249,7 @@ Ajax.response = function(submitter, formObj, data){
   else {
     // Display preview
     if (data.preview !== null) {
+      Ajax.updater(data.updaters);
       Ajax.message(decodeURIComponent(data.preview), 'preview',
         formObj, submitter);
     }
