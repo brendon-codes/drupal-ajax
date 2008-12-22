@@ -1,4 +1,4 @@
- <?php
+<?php
  /**
  * Automatic AJAX forms validation, preview, and submission
  *
@@ -41,17 +41,25 @@ function ajax_uninstall() {
 }
 
 /**
- * First update
+ * Update 1
  */
 function ajax_update_6100() {
+  return array();
+}
+
+/**
+ * Update 2
+ */
+function ajax_update_6101() {
   // Devel module likes to go last,
   // so we will go right before the devel module
-  db_query(
+  $ret = array();
+  $ret[] = update_sql(
     "UPDATE {system} s SET " .
     "  s.weight = 87 " .
     "WHERE " .
     "  s.name = 'ajax' AND " .
     "  s.type = 'module' "
   );
-  return TRUE;
+  return $ret;
 }
