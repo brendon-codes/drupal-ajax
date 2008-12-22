@@ -389,15 +389,15 @@ function ajax_validator(&$form, &$form_state) {
     $data = ajax_build(array(
       'messages_error' => form_get_errors()
     ));
-    // Time to send messages
+    // FAIL
     if (!$data['status']) {
       ajax_invoke('ajax_validate_fail', $form, $form_state, $data);
       ajax_out($data);
     }
-    // Validate cleanup
+    // PASS
     else {
       $pass = TRUE;
-      ajax_invoke('ajax_validate_cleanup', $form, $form_state, $data, $pass);
+      ajax_invoke('ajax_validate_pass', $form, $form_state, $data, $pass);
       if (!$pass) {
         ajax_out($data);
       }
