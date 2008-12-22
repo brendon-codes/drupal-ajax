@@ -23,6 +23,19 @@ function ajax_captcha_ajax_validate_fail(&$form, &$form_state, &$data) {
   return TRUE;
 }
 
+/**
+ * validation fail hook
+ *
+ * @param $form Assoc
+ * @param $form_state Assoc
+ * @param $data Assoc
+ * @return Bool
+ */
+function ajax_captcha_ajax_validate_pass(&$form, &$form_state, &$data, &$pass) {
+  ajax_captcha_process($form, $form_state, $data);
+  return TRUE;
+}
+
 
 /**
  * Captcha functionality
@@ -38,7 +51,7 @@ function ajax_captcha_process(&$form, &$form_state, &$data) {
   if (array_key_exists('captcha_token', $form_state['values']) &&
       array_key_exists('captcha_type', $form_state['values']) &&
       array_key_exists('captcha_query', $form_state['values'])) {
-    $data['debug'] .= 'B';
+    //$data['debug'] .= 'B';
     // COnditional show
     if (_captcha_persistence_skip($form['form_id']['#value'])) {
       $data['updaters'][] = array(
@@ -56,16 +69,19 @@ function ajax_captcha_process(&$form, &$form_state, &$data) {
         $selector =
           "#edit-captcha-response-wrapper .field-prefix";
         $type = 'html_in';
+        //$data['debug'] .= 'E';
       }
       elseif ($form_state['values']['captcha_type'] === 'text') {
         $selector =
           "#edit-captcha-response-wrapper label[for='edit-captcha-response']";
         $type = 'html_in';
+        //$data['debug'] .= 'F';
       }
       elseif ($form_state['values']['captcha_type'] === 'image') {
         $selector =
           ".captcha img";
         $type = 'html_out';
+        //$data['debug'] .= 'G';
       }
       $data['updaters'][] = array(
         'type' => 'field',
