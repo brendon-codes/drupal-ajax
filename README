@@ -1,41 +1,106 @@
-Drupal AJAX Forms
-Brendon Crawford
-http://drupal.org/project/ajax
-irc://freenode.net/#drupy
+##
+## AJAX Forms README
+##
 
-In a nutshell, this module will "Ajaxify" almost any Drupal form, including
-the user login form. It will essentially allow you to validate, preview, and
-save your forms without a page refresh.
+  Author: Brendon Crawford
+  Date: 2008-12-21
+  Homepage: http://drupal.org/project/ajax
+  IRC: irc://freenode.net/#drupy
 
-By default in Drupal, when a form is submitted, the values of that form are
-sent through a series of Drupal validation procedures. When these validations
-are completed the validation messages are normally sent back to the user with
-a standard page refresh.
+##
+## ABOUT
+##
 
-For example, if a user fills out a form which requires a first name, but the
-user leaves these fields blank, they will be presented with a message that
-says "First Name is Required".
+  The AJAX Forms module will "AJAXify" any Drupal form. This essentially allow
+  for validation, preview, and submission without a page refresh.
 
-This module allows the validation messages to be sent back to the user without
-a page refresh, so they appear in realtime. This makes for a more streamlined
-user experience. If the submitted form has no errors, the page will be
-redirected to the appropriate submission landing page.
+  AJAX Forms supports most forms out of the box. For more complex forms a
+  plugin/API system is provided to allow easy AJAX Forms integration.
 
-Configuration is easy. Simply go to "admin/settings/ajax" and select the
-forms for which you want to use AJAX handling.
+  By default in Drupal, when a form is submitted, the values of that form are
+  sent through a series of Drupal validation procedures. When these validations
+  are completed the validation messages are normally sent back to the user with
+  a standard page refresh.
 
-To test the module, go to one of the forms which you selected. For example if
-you selected "Content Type Blog", then go to "node/add/blog". Then fill out
-the form, intentionally inputting invalid data or leave a required field
-blank. Submit the form. You should then see the validation messages appear at
-the top of the form near-instantaniously.
+  For example, if a user fills out a form which requires a first name, but the
+  user leaves these fields blank, they will be presented with a message that
+  says "First Name is Required".
 
-This module will work out of the box with forms displayed in a Thickbox.
-However, it will only work out of the box with the "AJAX Content" Thickbox,
-NOT the "iFramed Content" Thickbox.
+  This module allows the validation messages to be sent back to the user without
+  a page refresh, so they appear in realtime. This makes for a more streamlined
+  user experience. If the submitted form has no errors, the page will be
+  redirected to the appropriate submission landing page.
 
-This module will work with the Captcha module (6.x-1.0-rc2), but you must first
-apply a set of patches to the captcha module which are provided in the
-"patches/captcha" directory.
+##
+## USAGE
+##
 
-Support for Drupal 5.x has been discontinued.
+  At the Drupal module admin page, enable the "Ajax forms" module. Also enable
+  any other Ajax forms plugins that you may need to use.
+  
+  Next, go to "admin/settings/ajax" and select the forms for which you want to
+  use AJAX handling from the "Default Forms" section. You can also optionally
+  specify a form ID in the "Custom Forms" section.
+
+  To test the module, go to one of the forms which you selected or specified.
+  For example if you selected "Content Type: Blog", then go to "node/add/blog".
+  Then, fill out the form, intentionally inputting invalid data or leave a
+  required field blank. Submit the form. You should then see the validation
+  messages appear at the top of the form near-instantaniously.
+
+##
+## DEVELOPERS
+##
+
+  The AJAX Forms module will properly handle MOST forms out of the box. If,
+  however, your forms require special or complex handling, a plugin/API system
+  has been provided to allow for easy integration. AJAX Forms provides the
+  following module hooks:
+
+    hook_ajax_validate_fail (&$form, &$form_state, &$data)
+    
+      $form Assoc - A Drupal form object
+      $form_state Assoc - A Drupal form_state object
+      $data Assoc - The AJAX Forms internal data object.
+
+    hook_ajax_validate_cleanup (&$form, &$form_state, &$data, &$pass)
+
+      $form Assoc - A Drupal form object
+      $form_state Assoc - A Drupal form_state object
+      $data Assoc - The AJAX Forms internal data object.
+      $pass Bool - Determines whether or not data should move to
+        submission stage
+
+    hook_ajax_types (&$types)
+
+      $types Assoc - A list of available forms that an end user can
+        select for AJAX Forms to use.
+
+    hook_ajax_alter (&$form, &$form_id)
+
+      $form Assoc - A Drupal form object
+      $form_id - A Drupal form ID
+
+  A module can also specify that a form should ALWAYS use AJAX Forms
+  regardless of user selection, by setting the "#ajax" property of the form
+  to TRUE. Example:
+
+    foobar_form_alter(&$form, $form_state, $form_id) {
+      $form['#ajax'] = TRUE;
+    }
+
+  For more developer information, please see the example AJAX Forms plugins
+  which are provided in the "ajax/plugins" directory.
+
+##
+## NOTES
+##
+
+  This module will work out of the box with forms displayed in a Thickbox.
+  However, it will only work out of the box with the "AJAX Content" Thickbox,
+  NOT the "iFramed Content" Thickbox.
+
+  This module will work with the Captcha module (6.x-1.0-rc2) using the
+  provided Captcha Plugin, but you must first apply a set of patches to the
+  captcha module which are provided in the "ajax/plugins/captcha/patches"
+  directory.
