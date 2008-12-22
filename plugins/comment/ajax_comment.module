@@ -49,7 +49,7 @@ function ajax_comment_ajax_types(&$types) {
  * @return Bool
  *
  */
-function ajax_comment_ajax_validate_cleanup(&$form, &$form_state, &$data, &$pass) {
+function ajax_comment_ajax_validate_pass(&$form, &$form_state, &$data, &$pass) {
   if ($form['form_id']['#value'] === 'comment_form' &&
       $form['#post']['op'] === t('Preview')) {
     $data['preview'] = ajax_comment_preview($form, $form_state);

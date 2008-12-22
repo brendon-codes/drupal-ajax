@@ -59,27 +59,36 @@
 
     hook_ajax_validate_fail (&$form, &$form_state, &$data)
     
-      $form Assoc - A Drupal form object
-      $form_state Assoc - A Drupal form_state object
-      $data Assoc - The AJAX Forms internal data object.
+      $form Assoc
+        A Drupal form object
+      $form_state Assoc
+        A Drupal form_state object
+      $data Assoc
+        The AJAX Forms internal data object.
 
-    hook_ajax_validate_cleanup (&$form, &$form_state, &$data, &$pass)
+    hook_ajax_validate_pass (&$form, &$form_state, &$data, &$pass)
 
-      $form Assoc - A Drupal form object
-      $form_state Assoc - A Drupal form_state object
-      $data Assoc - The AJAX Forms internal data object.
-      $pass Bool - Determines whether or not data should move to
-        submission stage
+      $form Assoc
+        A Drupal form object
+      $form_state Assoc
+        A Drupal form_state object
+      $data Assoc
+        The AJAX Forms internal data object.
+      $pass Bool
+        Determines whether or not data should move to submission stage
 
     hook_ajax_types (&$types)
 
-      $types Assoc - A list of available forms that an end user can
-        select for AJAX Forms to use.
+      $types Assoc
+        A list of available forms that an end user
+        can select for AJAX Forms to use.
 
     hook_ajax_alter (&$form, &$form_id)
 
-      $form Assoc - A Drupal form object
-      $form_id - A Drupal form ID
+      $form Assoc
+        A Drupal form object
+      $form_id String
+        A Drupal form ID
 
   A module can also specify that a form should ALWAYS use AJAX Forms
   regardless of user selection, by setting the "#ajax" property of the form
