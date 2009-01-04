@@ -414,8 +414,7 @@ function ajax_validator(&$form, &$form_state) {
  */
 function ajax_out($data) {
   header('HTTP/1.1 200 OK', TRUE);
-  header("Content-Type: application/json; charset=UTF-8", TRUE);
-  print drupal_to_js($data);
+  drupal_json($data);
   exit;
 }
 
