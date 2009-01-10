@@ -192,6 +192,7 @@ function ajax_form_alter(&$form, $form_state, $form_id) {
     ajax_validator_set($form);
     ajax_submitter_find($form, $found);
     ajax_submitter_set($form, $found);
+    //krumo($form);
   }
   return TRUE;
 }
@@ -413,6 +414,7 @@ function ajax_validator(&$form, &$form_state) {
  * @return Exit
  */
 function ajax_out($data) {
+  ob_clean();
   header('HTTP/1.1 200 OK', TRUE);
   drupal_json($data);
   exit;
