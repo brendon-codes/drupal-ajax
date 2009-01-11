@@ -6,41 +6,48 @@
  * @depends Drupal 6
  * @author brendoncrawford
  * @note This file uses a 79 character width limit.
+ * 
+ * @note
+ *   When using an Ajax form within a Lightbox/Thickbox which is loaded via
+ *   AJAX, be sure to call Drupal.attachBehaviors(LightBoxContainer) where
+ *   LightBoxContainer is the DOM element containing the Lightbox/Thickbox.
+ * @see http://drupal.org/node/114774#javascript-behaviors
  *
  */
 
 var Ajax = new Object;
 
-Ajax.conf = {
-  jquery_ver : '1.2.0'
-}
-
 Ajax.pass = true;
 
 /**
- * Preprocessor
+ * Init function.
+ * This is being executed by Drupal behaviours.
+ * See bottom of script.
  * 
+ * @param {HTMLElement} context
  * @return {Bool}
  */
-Ajax.preprocess = function() {
-  var v, i, _i, j_ver, jq_current_ver, pass;
-  jq_current_ver = jQuery.fn.jquery.toString();
-  v = jq_current_ver.split('.');
-  j_ver = Ajax.conf.jquery_ver.split('.');
-  for (i = 0, _i = j_ver.length; i < _i; i++) {
-    if (parseInt(v[i]) < parseInt(j_ver[i])) {
-      window.alert(
-        "Required minumum jquery version is " +
-        Ajax.conf.jquery_ver + ". The version currently installed " +
-        "is " + jq_current_ver + ". Please follow the instructions " +
-        "which were provided with the jQuery Update Module for upgrading " +
-        "jQuery. The jQuery Update homepage can be found at " +
-        "http://drupal.org/project/jquery_update. Until jQuery is upgraded, " +
-        "AJAX validation will not be activated for this form.");
-      Ajax.pass = false;
-    }
+Ajax.init = function(context) {
+  var f, s;
+  if (f = $('.ajax-form', context)) {
+    s = $('.ajax-trigger', f);
+    s.click(function(){
+      this.form.ajax_activator = $(this);
+      return true;
+    });
+    f.each(function(){
+      this.ajax_activator = null;
+      $(this).submit(function(){
+        if (this.ajax_activator === null) {
+          this.ajax_activator = $('#edit-submit', this);
+        }
+        Ajax.go($(this), this.ajax_activator);
+        return false;
+      });
+      return true;
+    });
   }
-  return true;
+  return false;
 }
 
 /**
@@ -61,15 +68,13 @@ Ajax.tinyMCE = function() {
  * @param {Object} submitter_
  * @return {Bool}
  */
-Ajax.go = function(submitter_) {
+Ajax.go = function(formObj, submitter) {
   var data, loadingBox, formObj, data, submitter, submitterVal, thisForm;
   if (!Ajax.pass) {
     return false;
   }
   else {
     Ajax.tinyMCE();
-    formObj = $(submitter_.form);
-    submitter = $(submitter_);
     submitterVal = submitter.val();
     data = formObj.serializeArray();
     data[data.length] = {
@@ -80,7 +85,7 @@ Ajax.go = function(submitter_) {
       name: 'ajax',
       value: 1
     };
-    submitter.val('Loading...');
+    submitter.val(Drupal.t('Loading...'));
     $.ajax({
       url: formObj[0].getAttribute('action'),
       data: data,
@@ -265,7 +270,7 @@ Ajax.response = function(submitter, formObj, data){
           data.messages_warning.length === 0) {
         Ajax.message([{
           id : 0,
-          value : 'Submission Complete.'
+          value : Drupal.t('Submission Complete')
         }], 'status', formObj, submitter);
       }
     }
@@ -278,4 +283,6 @@ Ajax.response = function(submitter, formObj, data){
   return true;
 }
 
-Ajax.preprocess();
+Drupal.behaviors.ajax = Ajax.init;
+
+

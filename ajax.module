@@ -247,6 +247,7 @@ function ajax_path_info($val) {
  */
 function ajax_validator_set(&$form) {
   $form['#validate'][] = 'ajax_validator';
+  $form['#attributes']['class'] = 'ajax-form';
   return TRUE;
 }
 
@@ -260,6 +261,7 @@ function ajax_validator_set(&$form) {
 function ajax_submitter_set(&$form, $found) {
   if (!$found) {
     $form['#submit'][] = 'ajax_submitter';
+    $form['#attributes']['class'] = 'ajax-form';
   }
   return TRUE;
 }
@@ -280,8 +282,7 @@ function ajax_submitter_find(&$form, &$found) {
           ($form[$form_key]['#type'] === 'submit' ||
           $form[$form_key]['#type'] === 'button')) &&
           ($form_key === 'submit' || $form_key === 'preview')) {
-        $form[$form_key]['#attributes'] =
-          array('onclick' => 'return Ajax.go(this);');
+        $form[$form_key]['#attributes']['class'] = 'ajax-trigger';
         if (array_key_exists('#submit', $form[$form_key]) &&
             !empty($form[$form_key]['#submit'])) {
           $form[$form_key]['#submit'][] = 'ajax_submitter';
