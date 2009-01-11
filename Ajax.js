@@ -8,16 +8,17 @@
  * @note This file uses a 79 character width limit.
  * 
  * @note
- *   When using an Ajax form within a Lightbox/Thickbox which is loaded via
+ *   When using an Drupal.Ajax form within a Lightbox/Thickbox which is loaded via
  *   AJAX, be sure to call Drupal.attachBehaviors(LightBoxContainer) where
  *   LightBoxContainer is the DOM element containing the Lightbox/Thickbox.
+ * 
  * @see http://drupal.org/node/114774#javascript-behaviors
  *
  */
 
-var Ajax = new Object;
+Drupal.Ajax = new Object;
 
-Ajax.pass = true;
+Drupal.Ajax.pass = true;
 
 /**
  * Init function.
@@ -27,7 +28,7 @@ Ajax.pass = true;
  * @param {HTMLElement} context
  * @return {Bool}
  */
-Ajax.init = function(context) {
+Drupal.Ajax.init = function(context) {
   var f, s;
   if (f = $('.ajax-form', context)) {
     s = $('.ajax-trigger', f);
@@ -41,7 +42,7 @@ Ajax.init = function(context) {
         if (this.ajax_activator === null) {
           this.ajax_activator = $('#edit-submit', this);
         }
-        Ajax.go($(this), this.ajax_activator);
+        Drupal.Ajax.go($(this), this.ajax_activator);
         return false;
       });
       return true;
@@ -55,7 +56,7 @@ Ajax.init = function(context) {
  * 
  * @return {Bool}
  */
-Ajax.tinyMCE = function() {
+Drupal.Ajax.tinyMCE = function() {
   if (window.tinyMCE && window.tinyMCE.triggerSave) {
     tinyMCE.triggerSave();
   }
@@ -68,13 +69,13 @@ Ajax.tinyMCE = function() {
  * @param {Object} submitter_
  * @return {Bool}
  */
-Ajax.go = function(formObj, submitter) {
+Drupal.Ajax.go = function(formObj, submitter) {
   var data, loadingBox, formObj, data, submitter, submitterVal, thisForm;
-  if (!Ajax.pass) {
+  if (!Drupal.Ajax.pass) {
     return false;
   }
   else {
-    Ajax.tinyMCE();
+    Drupal.Ajax.tinyMCE();
     submitterVal = submitter.val();
     data = formObj.serializeArray();
     data[data.length] = {
@@ -94,7 +95,7 @@ Ajax.go = function(formObj, submitter) {
       dataType: 'json',
       success: function(data){
         submitter.val(submitterVal);
-        Ajax.response(submitter, formObj, data);
+        Drupal.Ajax.response(submitter, formObj, data);
       }
       
     })
@@ -108,7 +109,7 @@ Ajax.go = function(formObj, submitter) {
  * @param {Object} submitter
  * @return {Bool}
  */
-Ajax.scroller = function(submitter) {
+Drupal.Ajax.scroller = function(submitter) {
   var scroll_weight, box, found, timer;
   scroll_weight = 100;
   timer = window.setInterval(function() {
@@ -168,7 +169,7 @@ Ajax.scroller = function(submitter) {
  * @param {Object} submitter
  * @return {Bool}
  */
-Ajax.message = function(messages, type, formObj, submitter) {
+Drupal.Ajax.message = function(messages, type, formObj, submitter) {
   var i, _i, thisItem, log, errBox, h;
   // Cleanups
   $('.messages, .ajax-preview', formObj).remove();
@@ -197,7 +198,7 @@ Ajax.message = function(messages, type, formObj, submitter) {
     }
     errBox.html(log);
   }
-  Ajax.scroller(submitter[0]);
+  Drupal.Ajax.scroller(submitter[0]);
   return true;
 }
 
@@ -207,7 +208,7 @@ Ajax.message = function(messages, type, formObj, submitter) {
  * @param {Object} updaters
  * @return {Bool}
  */
-Ajax.updater = function(updaters) {
+Drupal.Ajax.updater = function(updaters) {
   var i, _i, elm;
   for (i = 0, _i = updaters.length; i < _i; i++) {
     elm = $(updaters[i].selector);
@@ -239,14 +240,14 @@ Ajax.updater = function(updaters) {
  * @param {Object} data
  * @return {Bool}
  */
-Ajax.response = function(submitter, formObj, data){
+Drupal.Ajax.response = function(submitter, formObj, data){
   var newSubmitter;
   /**
    * Failure
    */
   if (data.status === false) {
-    Ajax.updater(data.updaters);
-    Ajax.message(data.messages_error, 'error', formObj, submitter);
+    Drupal.Ajax.updater(data.updaters);
+    Drupal.Ajax.message(data.messages_error, 'error', formObj, submitter);
   }
   /**
    * Success
@@ -254,21 +255,21 @@ Ajax.response = function(submitter, formObj, data){
   else {
     // Display preview
     if (data.preview !== null) {
-      Ajax.updater(data.updaters);
-      Ajax.message(decodeURIComponent(data.preview), 'preview',
+      Drupal.Ajax.updater(data.updaters);
+      Drupal.Ajax.message(decodeURIComponent(data.preview), 'preview',
         formObj, submitter);
     }
     // If no redirect, then simply show messages
     else if (data.redirect === null) {
       if (data.messages_status.length > 0) {
-        Ajax.message(data.messages_status, 'status', formObj, submitter);
+        Drupal.Ajax.message(data.messages_status, 'status', formObj, submitter);
       }
       if (data.messages_warning.length > 0) {
-        Ajax.message(data.messages_warning, 'warning', formObj, submitter);
+        Drupal.Ajax.message(data.messages_warning, 'warning', formObj, submitter);
       }
       if (data.messages_status.length === 0 &&
           data.messages_warning.length === 0) {
-        Ajax.message([{
+        Drupal.Ajax.message([{
           id : 0,
           value : Drupal.t('Submission Complete')
         }], 'status', formObj, submitter);
@@ -283,6 +284,6 @@ Ajax.response = function(submitter, formObj, data){
   return true;
 }
 
-Drupal.behaviors.ajax = Ajax.init;
+Drupal.behaviors.Ajax = Drupal.Ajax.init;
 
 
