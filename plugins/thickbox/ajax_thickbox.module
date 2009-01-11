@@ -1,0 +1,23 @@
+<?php
+/**
+ * AJAX Thickbox Plugin
+ *
+ * @see http://drupal.org/project/ajax
+ * @see irc://freenode.net/#drupy
+ * @depends Drupal 6
+ * @author brendoncrawford
+ * @note This file uses a 79 character width limit.
+ *
+ */
+
+/**
+ * hook_init
+ *
+ * @return Bool
+ */
+function ajax_thickbox_init() {
+  drupal_add_js(drupal_get_path('module', 'ajax_thickbox') .
+    '/ajax_thickbox.js', 'theme');
+  return TRUE;
+}
+

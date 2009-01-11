@@ -1,0 +1,6 @@
+name = Ajax plugin - thickbox
+description = Enhances AJAX functionality for thickbox.
+package = Ajax forms
+dependencies[] = ajax
+core = 6.x
+

@@ -1,0 +1,7 @@
+name = Ajax plugin - tinymce
+description = Enables AJAX functionality for tinymce
+package = Ajax forms
+dependencies[] = ajax
+dependencies[] = tinymce
+core = 6.x
+

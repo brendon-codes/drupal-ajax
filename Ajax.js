@@ -7,16 +7,12 @@
  * @author brendoncrawford
  * @note This file uses a 79 character width limit.
  * 
- * @note
- *   When using an Drupal.Ajax form within a Lightbox/Thickbox which is loaded via
- *   AJAX, be sure to call Drupal.attachBehaviors(LightBoxContainer) where
- *   LightBoxContainer is the DOM element containing the Lightbox/Thickbox.
- * 
- * @see http://drupal.org/node/114774#javascript-behaviors
  *
  */
 
 Drupal.Ajax = new Object;
+
+Drupal.Ajax.plugins = {};
 
 Drupal.Ajax.pass = true;
 
@@ -31,6 +27,7 @@ Drupal.Ajax.pass = true;
 Drupal.Ajax.init = function(context) {
   var f, s;
   if (f = $('.ajax-form', context)) {
+    Drupal.Ajax.invoke('init');
     s = $('.ajax-trigger', f);
     s.click(function(){
       this.form.ajax_activator = $(this);
@@ -52,13 +49,18 @@ Drupal.Ajax.init = function(context) {
 }
 
 /**
- * TinyMCE Trigger
+ * Invokes plugins
  * 
- * @return {Bool}
+ * @param {Object} formObj
+ * @param {Object} submitter
  */
-Drupal.Ajax.tinyMCE = function() {
-  if (window.tinyMCE && window.tinyMCE.triggerSave) {
-    tinyMCE.triggerSave();
+Drupal.Ajax.invoke = function(hook, args) {
+  var plugin, r;
+  for (plugin in Drupal.Ajax.plugins) {
+    r = Drupal.Ajax.plugins[plugin](hook, args);
+    if (r === false) {
+      return false;
+    }
   }
   return true;
 }
@@ -75,7 +77,7 @@ Drupal.Ajax.go = function(formObj, submitter) {
     return false;
   }
   else {
-    Drupal.Ajax.tinyMCE();
+    Drupal.Ajax.invoke('submit');
     submitterVal = submitter.val();
     data = formObj.serializeArray();
     data[data.length] = {
@@ -116,7 +118,8 @@ Drupal.Ajax.scroller = function(submitter) {
     box = submitter;
     found = false;
     // Watch for thickbox
-    while (box.parentNode !== null && box.id !== 'TB_window') {
+    while (box.parentNode !== null &&
+        Drupal.Ajax.invoke('scrollFind', {container:box})) {
       box = box.parentNode;
       // Document
       if (box === document) {
