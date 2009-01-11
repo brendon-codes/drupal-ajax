@@ -16,6 +16,8 @@ Drupal.Ajax.plugins = {};
 
 Drupal.Ajax.pass = true;
 
+Drupal.Ajax.firstRun = false;
+
 /**
  * Init function.
  * This is being executed by Drupal behaviours.
@@ -27,7 +29,10 @@ Drupal.Ajax.pass = true;
 Drupal.Ajax.init = function(context) {
   var f, s;
   if (f = $('.ajax-form', context)) {
-    Drupal.Ajax.invoke('init');
+    if (!Drupal.Ajax.firstRun) {
+      Drupal.Ajax.invoke('init');
+      Drupal.Ajax.firstRun = true;
+    }
     s = $('.ajax-trigger', f);
     s.click(function(){
       this.form.ajax_activator = $(this);
@@ -96,6 +101,7 @@ Drupal.Ajax.go = function(formObj, submitter) {
       async: true,
       dataType: 'json',
       success: function(data){
+        console.log(1);
         submitter.val(submitterVal);
         Drupal.Ajax.response(submitter, formObj, data);
       }
