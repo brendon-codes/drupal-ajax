@@ -10,8 +10,10 @@
  */
 
 /**
- * TinyMCE Trigger
+ * Ajax Forms plugin for tinymce
  * 
+ * @param {String} hook
+ * @param {Object} args
  * @return {Bool}
  */
 Drupal.Ajax.plugins.tinyMCE = function(hook, args) {

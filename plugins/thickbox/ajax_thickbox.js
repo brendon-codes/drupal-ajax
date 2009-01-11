@@ -16,6 +16,13 @@
  *
  */
 
+/**
+ * Ajax Forms plugin for thickbox
+ * 
+ * @param {String} hook
+ * @param {Object} args
+ * @return {Bool}
+ */
 Drupal.Ajax.plugins.thickbox = function(hook, args) {
   var tb_init_original;
   if (hook === 'scrollFind') {

@@ -3,7 +3,7 @@
 ##
 
   Author: Brendon Crawford
-  Date: 2008-12-21
+  Date: 2009-01-11
   Homepage: http://drupal.org/project/ajax
   IRC: irc://freenode.net/#drupy
 
@@ -49,7 +49,7 @@
   messages appear at the top of the form near-instantaniously.
 
 ##
-## DEVELOPERS
+## DEVELOPERS: PHP API
 ##
 
   The AJAX Forms module will properly handle MOST forms out of the box. If,
@@ -100,6 +100,32 @@
 
   For more developer information, please see the example AJAX Forms plugins
   which are provided in the "ajax/plugins" directory.
+
+##
+## Developers: JavaScript API
+##
+
+  The Ajax Forms JavaScript plugin provides the following plugin callbacks(s):
+
+    Drupal.Ajax.plugins.FOO(hook, args)
+
+  Where FOO is the name of your plugin.
+
+    hook String
+      A Drupal form object
+    args Assoc/Object
+      A keyed object/associative-array of args which are specific to this hook.
+
+  hook can be one of:
+
+    scrollFind
+      Executes as window scrolls up after Ajax response.
+    init
+      On page load.
+
+  For Ajax Forms plugins usage examples, please see the "thickbox" and
+  "tinymce" plugins which are provided with the Ajax Forms module in the
+  "ajax/plugins" directory.
 
 ##
 ## NOTES
