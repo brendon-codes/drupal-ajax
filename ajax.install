@@ -29,17 +29,6 @@ function ajax_install() {
   return TRUE;
 }
 
- /**
- * hook_uninstall
- *
- * @return Bool
- */
-function ajax_uninstall() {
-  variable_del('ajax_types_custom');
-  variable_del('ajax_types_default');
-  return TRUE;
-}
-
 /**
  * Update 1
  */
