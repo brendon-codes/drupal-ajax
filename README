@@ -35,8 +35,9 @@
 ## USAGE
 ##
 
-  At the Drupal module admin page, enable the "Ajax forms" module. Also enable
-  any other Ajax forms plugins that you may need to use.
+  At the Drupal module admin page, enable the "Ajax forms" module and the
+  "Ajax forms ui" module. Also enable any other Ajax forms plugins that you
+  may need to use.
   
   Next, go to "admin/settings/ajax" and select the forms for which you want to
   use AJAX handling from the "Default Forms" section. You can also optionally
@@ -54,8 +55,14 @@
 
   The AJAX Forms module will properly handle MOST forms out of the box. If,
   however, your forms require special or complex handling, a plugin/API system
-  has been provided to allow for easy integration. AJAX Forms provides the
-  following module hooks:
+  has been provided to allow for easy integration. A form can activated with
+  AJAX functionality by specifying the '#ajax' property of the form...
+
+    foobar_form_alter(&$form, $form_state, $form_id) {
+      $form['#ajax'] = TRUE;
+    }
+
+  AJAX Forms also provides the following module hooks:
 
     hook_ajax_validate_fail (&$form, &$form_state, &$data)
     
@@ -89,14 +96,6 @@
         A Drupal form object
       $form_id String
         A Drupal form ID
-
-  A module can also specify that a form should ALWAYS use AJAX Forms
-  regardless of user selection, by setting the "#ajax" property of the form
-  to TRUE. Example:
-
-    foobar_form_alter(&$form, $form_state, $form_id) {
-      $form['#ajax'] = TRUE;
-    }
 
   For more developer information, please see the example AJAX Forms plugins
   which are provided in the "ajax/plugins" directory.
