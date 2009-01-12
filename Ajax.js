@@ -106,7 +106,6 @@ Drupal.Ajax.go = function(formObj, submitter) {
       async: true,
       dataType: 'json',
       success: function(data){
-        console.log(1);
         submitter.val(submitterVal);
         Drupal.Ajax.response(submitter, formObj, data);
       }
@@ -291,7 +290,6 @@ Drupal.Ajax.response = function(submitter, formObj, data){
     }
     // Redirect
     else {
-      //console.log(data.redirect);
       window.location.href = data.redirect;
     }
   }

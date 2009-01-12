@@ -15,119 +15,6 @@
  *
  */
 
-/**
- * hook_menu
- *
- * @return Assoc
- */
-function ajax_menu() {
-  $items['admin/settings/ajax'] = array(
-    'title' => t('Ajax Forms Settings'),
-    'description' => t('Controls which forms should use AJAX submissions.'),
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('ajax_admin'),
-    'access arguments' => array('access administration pages'),
-    'type' => MENU_NORMAL_ITEM,
-  );
-  return $items;
-}
-
-/**
- * Get content types
- *
- * @return Assoc
- */
-function ajax_get_types() {
-  $types = array_merge(
-    ajax_types_node(),
-    ajax_types_user());
-  ajax_invoke('ajax_types', $types);
-  return $types;
-}
-
-/**
- * Get node types
- *
- * @return Assoc
- */
-function ajax_types_node() {
-  $out = array();
-  $types = node_get_types();
-  foreach ($types as $k => $v) {
-    $out[$k . '_node_form'] = ucwords('Content Type: ' . $v->name);
-  }
-  return $out;
-}
-
-/**
- * Get module types.
- * This function currently unused.
- *
- * @return Assoc
- */
-function ajax_types_module() {
-  $out = array();
-  $funcs = get_defined_functions();
-  foreach ($funcs['user'] as $f) {
-    if (preg_match("/^([a-zA-Z][a-zA-Z0-9_]*?)_submit$/", $f, $func_name)) {
-      $out[$func_name[1]] = ucwords(str_replace('_', ' ', $func_name[1]));
-    }
-  }
-  return $out;
-}
-
-/**
- * Get other default types
- *
- * @return Assoc
- */
-function ajax_types_user() {
-  return array(
-    'user_login' => t('User Login'),
-    'user_edit' => t('User Edit'),
-    'user_register' => t('User Register')
-  );
-}
-
-/**
- * Display admin form
- *
- * @return Assoc
- */
-function ajax_admin() {
-  $form = array(
-    'container_default' => array(
-      '#type' => 'fieldset',
-      '#title' => t('Default Forms'),
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
-      'ajax_types_default' => array(
-        '#type' => 'select',
-        '#multiple' => TRUE,
-        '#options' => ajax_get_types(),
-        '#default_value' => variable_get('ajax_types_default', array()),
-        '#size' => 20,
-        '#description' => t(
-          "Select the default forms you wish to use AJAX submissions.")
-      )
-    ),
-    'container_custom' => array(
-      '#type' => 'fieldset',
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
-      '#title' => t('Custom Forms (Advanced)'),
-      'ajax_types_custom' => array(
-        '#type' => 'textarea',
-        '#default_value' => variable_get('ajax_types_custom', ''),
-        '#description' => t(
-          'Enter the form IDs of the custom forms you wish to ' .
-          'use AJAX Submissions. Enter one ID per line. Only alpha-numeric ' .
-          'characters should be used. ')
-      )
-    )
-  );
-  return system_settings_form($form);
-}
 
 /**
  * hook_init
@@ -140,41 +27,6 @@ function ajax_init() {
   return TRUE;
 }
 
-/**
- * Checks if form is a specified type
- *
- * @param $form Assoc
- * @param $form_id String
- * @return Bool
- */
-function ajax_is_type($form, $form_id) {
-  // Module defined forms
-  if (array_key_exists('#ajax', $form) && $form['#ajax']) {
-    return TRUE;
-  }
-  // User defined forms
-  else {
-    $exists = array_key_exists($form_id,
-      variable_get('ajax_types_default', array()));
-    if ($exists) {
-      return TRUE;
-    }
-    else {
-      $custom = variable_get('ajax_types_custom', FALSE);
-      if ($custom !== FALSE) {
-        $parts = preg_split("/[\r\n]+/", $custom, -1, PREG_SPLIT_NO_EMPTY);
-        if ($parts) {
-          foreach ($parts as $v) {
-            if (trim($v) === $form_id) {
-              return TRUE;
-            }
-          }
-        }
-      }
-      return FALSE;
-    }
-  }
-}
 
 /**
  * hook_form_alter
@@ -185,14 +37,12 @@ function ajax_is_type($form, $form_id) {
  * @return Bool
  */
 function ajax_form_alter(&$form, $form_state, $form_id) {
-  //watchdog('AJAX Forms', 'Form ID: %form_id', array('%form_id'=>$form_id));
-  if (ajax_is_type($form, $form_id)) {
+  if (array_key_exists('#ajax', $form) && $form['#ajax']) {
     $found = FALSE;
     ajax_invoke('ajax_alter', $form, $form_id);
     ajax_validator_set($form);
     ajax_submitter_find($form, $found);
     ajax_submitter_set($form, $found);
-    //krumo($form);
   }
   return TRUE;
 }
