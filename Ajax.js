@@ -33,7 +33,7 @@ Drupal.Ajax.init = function(context) {
       Drupal.Ajax.invoke('init');
       Drupal.Ajax.firstRun = true;
     }
-    s = $('.ajax-trigger', f);
+    s = $('input[type="submit"]', f);
     s.click(function(){
       this.form.ajax_activator = $(this);
       return true;
@@ -44,8 +44,13 @@ Drupal.Ajax.init = function(context) {
         if (this.ajax_activator === null) {
           this.ajax_activator = $('#edit-submit', this);
         }
-        Drupal.Ajax.go($(this), this.ajax_activator);
-        return false;
+        if (this.ajax_activator.hasClass('ajax-trigger')) {
+          Drupal.Ajax.go($(this), this.ajax_activator);
+          return false;
+        }
+        else {
+          return true;
+        }
       });
       return true;
     });
