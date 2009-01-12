@@ -1,0 +1,6 @@
+name = Ajax forms ui
+description = User Interface for Ajax forms. You will not be able to manage Ajax forms without this module. 
+package = Ajax forms
+dependencies[] = ajax
+core = 6.x
+
