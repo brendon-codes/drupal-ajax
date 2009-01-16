@@ -10,7 +10,6 @@
  * @note Available hooks are:
  *   hook_ajax_validate_fail
  *   hook_ajax_validate_cleanup
- *   hook_ajax_types
  *   hook_ajax_alter
  *
  */
@@ -39,7 +38,7 @@ function ajax_init() {
 function ajax_form_alter(&$form, $form_state, $form_id) {
   if (array_key_exists('#ajax', $form) && $form['#ajax']) {
     $found = FALSE;
-    ajax_invoke('ajax_alter', $form, $form_id);
+    ajax_invoke_alter($form, $form_state, $form_id);
     ajax_validator_set($form);
     ajax_submitter_find($form, $found);
     ajax_submitter_set($form, $found);
@@ -213,17 +212,56 @@ function ajax_submitter(&$form, &$form_state) {
 }
 
 /**
- * Invokes hooks
+ * Invokes hooks: ajax_validate_pass
  *
- * @param unknown_type $view_name
- * @param unknown_type $display_id
- * @param unknown_type $out
- * @return unknown
+ * @param $form Assoc
+ * @param $form_state Assoc
+ * @param $data Assoc
+ * @param $pass Bool
+ * @return Bool
  */
-function ajax_invoke($hook, &$p1=NULL, &$p2=NULL, &$p3=NULL, &$p4=NULL) {
+function ajax_invoke_validate_pass(&$form, &$form_state, &$data, &$pass) {
+  $hook = 'ajax_validate_pass';
   foreach (module_implements($hook) as $name) {
     $function = $name . '_' . $hook;
-    $result = $function($p1, $p2, $p3, $p4);
+    $result = $function($form, $form_state, $data, $pass);
+  }
+  return TRUE;
+}
+
+/**
+ * Invokes hooks: ajax_validate_fail
+ *
+ * @param $form Assoc
+ * @param $form_state Assoc
+ * @param $data Assoc
+ * @param $pass Bool
+ * @return Bool
+ *
+ */
+function ajax_invoke_validate_fail(&$form, &$form_state, &$data) {
+  $hook = 'ajax_validate_fail';
+  foreach (module_implements($hook) as $name) {
+    $function = $name . '_' . $hook;
+    $result = $function($form, $form_state, $data);
+  }
+  return TRUE;
+}
+
+/**
+ * Invokes hooks: ajax_alter
+ *
+ * @param $form Assoc
+ * @param $form_state Assoc
+ * @param $form_id String
+ * @return Bool
+ *
+ */
+function ajax_invoke_alter(&$form, &$form_state, $form_id) {
+  $hook = 'ajax_alter';
+  foreach (module_implements($hook) as $name) {
+    $function = $name . '_' . $hook;
+    $result = $function($form, $form_state, $form_id);
   }
   return TRUE;
 }
@@ -243,13 +281,13 @@ function ajax_validator(&$form, &$form_state) {
     ));
     // FAIL
     if (!$data['status']) {
-      ajax_invoke('ajax_validate_fail', $form, $form_state, $data);
+      ajax_invoke_validate_fail($form, $form_state, $data);
       ajax_out($data);
     }
     // PASS
     else {
       $pass = TRUE;
-      ajax_invoke('ajax_validate_pass', $form, $form_state, $data, $pass);
+      ajax_invoke_validate_pass($form, $form_state, $data, $pass);
       if (!$pass) {
         ajax_out($data);
       }

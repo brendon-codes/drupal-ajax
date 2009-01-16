@@ -17,7 +17,7 @@
  * @param $form_id String
  * @return Bool
  */
-function ajax_comment_ajax_alter(&$form, $form_id) {
+function ajax_comment_ajax_alter(&$form, &$form_state, $form_id) {
   if ($form_id === 'comment_form') {
     $form['submit'] = array(
       '#type' => 'submit',
