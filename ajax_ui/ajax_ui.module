@@ -8,10 +8,8 @@
  * @author brendoncrawford
  * @note This file uses a 79 character width limit.
  * @note Available hooks are:
- *   hook_ajax_validate_fail
- *   hook_ajax_validate_cleanup
  *   hook_ajax_types
- *   hook_ajax_alter
+ *
  *
  */
 
@@ -41,8 +39,24 @@ function ajax_ui_get_types() {
   $types = array_merge(
     ajax_ui_types_node(),
     ajax_ui_types_user());
-  ajax_invoke('ajax_types', $types);
+  ajax_ui_invoke_types($types);
   return $types;
+}
+
+/**
+ * Invokes hooks: ajax_types
+ *
+ * @param $types Assoc
+ * @return Bool
+ *
+ */
+function ajax_ui_invoke_types(&$types) {
+  $hook = 'ajax_types';
+  foreach (module_implements($hook) as $name) {
+    $function = $name . '_' . $hook;
+    $result = $function($types);
+  }
+  return TRUE;
 }
 
 /**
