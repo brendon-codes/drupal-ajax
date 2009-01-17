@@ -11,13 +11,14 @@
  */
 
 /**
- * hook_init
+ * Implementation of hook_preprocess_hook().
  *
+ * @param variables Assoc
  * @return Bool
+ *
  */
-function ajax_tinymce_init() {
+function ajax_tinymce_preprocess_page(&$variables) {
   drupal_add_js(drupal_get_path('module', 'ajax_tinymce') .
     '/ajax_tinymce.js', 'theme');
   return TRUE;
 }
-

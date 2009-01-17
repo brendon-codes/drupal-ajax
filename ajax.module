@@ -47,25 +47,13 @@ function ajax_preprocess_page(&$variables) {
  */
 function ajax_form_alter(&$form, $form_state, $form_id) {
   if (array_key_exists('#ajax', $form) && $form['#ajax']) {
-    $found = array('upload' => FALSE, 'submitter' => FALSE);
+    $found = array('submitter' => FALSE);
     ajax_invoke_alter($form, $form_state, $form_id);
     ajax_validator_set($form);
-    ajax_upload_find($form, $found);
     ajax_submitter_find($form, $found);
     ajax_submitter_set($form, $found);
   }
   return TRUE;
-}
-
-/**
- * Finds upload field
- *
- * @param $form Assoc
- * @param $found Assoc
- *
- */
-function ajax_upload_find(&$form, &$found) {
-
 }
 
 
@@ -326,7 +314,10 @@ function ajax_validator(&$form, &$form_state) {
  * @return Exit
  */
 function ajax_out($data) {
-  ob_clean();
+  $buffer_len = ob_get_length();
+  if ($buffer_len !== FALSE && $buffer_len > 0) {
+    ob_clean();
+  }
   header('HTTP/1.1 200 OK', TRUE);
   if (!array_key_exists('HTTP_X_REQUESTED_WITH', $_SERVER) &&
       $_SERVER['HTTP_X_REQUESTED_WITH'] !== 'XMLHttpRequest') {
