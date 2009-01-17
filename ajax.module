@@ -25,7 +25,7 @@
 function ajax_preprocess_page(&$variables) {
   drupal_add_js(drupal_get_path('module', 'ajax') .
     '/jquery/jquery.form.js', 'module');
-  drupal_add_js(drupal_get_path('module', 'ajax') . '/Ajax.js', 'module');
+  drupal_add_js(drupal_get_path('module', 'ajax') . '/ajax.js', 'module');
   $scripts = drupal_add_js();
   foreach (array('module', 'theme') as $scope) {
     if (array_key_exists('misc/jquery.form.js', $scripts[$scope])) {
