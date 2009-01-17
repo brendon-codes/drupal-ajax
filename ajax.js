@@ -80,23 +80,35 @@ Drupal.Ajax.invoke = function(hook, args) {
  * @return {Bool}
  */
 Drupal.Ajax.go = function(formObj, submitter) {
-  var submitterVal;
+  var submitterVal, submitterName, extraData;
   Drupal.Ajax.invoke('submit');
   submitterVal = submitter.val();
+  submitterName = submitter.attr('name');
   submitter.val(Drupal.t('Loading...'));
+  extraData = {};
+  extraData[submitterName] = submitterVal;
+  extraData['drupal_ajax'] = '1';
   formObj.ajaxSubmit({
-    beforeSend : function(xhr) {
-      xhr.setRequestHeader("X-Drupal-Ajax", "1");
-      return true;
-    },
+    extraData : extraData,
     beforeSubmit : function(data) {
       data[data.length] = {
-        name : submitter.attr('name'),
+        name : submitterName,
         value : submitterVal
+      }
+      data[data.length] = {
+        name : 'drupal_ajax',
+        value : '1'
       }
       return true;
     },
     dataType : 'json',
+    error: function (XMLHttpRequest, textStatus, errorThrown) {
+      window.alert(Drupal.t('ajax.module: An unknown error has occurred.'));
+      if (window.console) {
+        console.log('error', arguments);
+      }
+      return true;
+    },
     success: function(data){
       submitter.val(submitterVal);
       Drupal.Ajax.response(submitter, formObj, data);
