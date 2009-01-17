@@ -90,7 +90,7 @@
         A list of available forms that an end user
         can select for AJAX Forms to use.
 
-    hook_ajax_alter (&$form, &$form_id)
+    hook_ajax_alter (&$form, &$form_state, $form_id)
 
       $form Assoc
         A Drupal form object

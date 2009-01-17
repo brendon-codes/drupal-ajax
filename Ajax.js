@@ -14,8 +14,6 @@ Drupal.Ajax = new Object;
 
 Drupal.Ajax.plugins = {};
 
-Drupal.Ajax.pass = true;
-
 Drupal.Ajax.firstRun = false;
 
 /**
@@ -82,37 +80,30 @@ Drupal.Ajax.invoke = function(hook, args) {
  * @return {Bool}
  */
 Drupal.Ajax.go = function(formObj, submitter) {
-  var data, loadingBox, formObj, data, submitter, submitterVal, thisForm;
-  if (!Drupal.Ajax.pass) {
-    return false;
-  }
-  else {
-    Drupal.Ajax.invoke('submit');
-    submitterVal = submitter.val();
-    data = formObj.serializeArray();
-    data[data.length] = {
-      name: submitter.attr('name'),
-      value: submitterVal
-    };
-    data[data.length] = {
-      name: 'ajax',
-      value: 1
-    };
-    submitter.val(Drupal.t('Loading...'));
-    $.ajax({
-      url: formObj[0].getAttribute('action'),
-      data: data,
-      type: 'POST',
-      async: true,
-      dataType: 'json',
-      success: function(data){
-        submitter.val(submitterVal);
-        Drupal.Ajax.response(submitter, formObj, data);
+  var submitterVal;
+  Drupal.Ajax.invoke('submit');
+  submitterVal = submitter.val();
+  submitter.val(Drupal.t('Loading...'));
+  formObj.ajaxSubmit({
+    beforeSend : function(xhr) {
+      xhr.setRequestHeader("X-Drupal-Ajax", "1");
+      return true;
+    },
+    beforeSubmit : function(data) {
+      data[data.length] = {
+        name : submitter.attr('name'),
+        value : submitterVal
       }
-      
-    })
-    return false;
-  }
+      return true;
+    },
+    dataType : 'json',
+    success: function(data){
+      submitter.val(submitterVal);
+      Drupal.Ajax.response(submitter, formObj, data);
+      return true;
+    }
+  });
+  return false;
 }
 
 /**
