@@ -1,0 +1,7 @@
+name = Ajax plugin - fckeditor
+description = Enables AJAX functionality for FCKEditor
+package = Ajax
+dependencies[] = ajax
+dependencies[] = fckeditor
+core = 6.x
+
