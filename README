@@ -1,9 +1,9 @@
 ##
-## AJAX Forms README
+## Ajax.module
 ##
 
   Author: Brendon Crawford
-  Date: 2009-01-11
+  Date: 2009-01-17
   Homepage: http://drupal.org/project/ajax
   IRC: irc://freenode.net/#drupy
 
@@ -11,32 +11,41 @@
 ## ABOUT
 ##
 
-  The AJAX Forms module will "AJAXify" any Drupal form. This essentially allow
-  for validation, preview, and submission without a page refresh.
-
-  AJAX Forms supports most forms out of the box. For more complex forms a
-  plugin/API system is provided to allow easy AJAX Forms integration.
+  Ajax.module will AJAXify any Drupal form. This essentially allows for
+  validation, preview, and submission without a page refresh. Ajax.module
+  supports most forms out of the box. Ajax.module provides both an API for
+  module maintainers as well as an admin interface for easy configuration.
 
   By default in Drupal, when a form is submitted, the values of that form are
   sent through a series of Drupal validation procedures. When these validations
   are completed the validation messages are normally sent back to the user with
-  a standard page refresh.
+  a standard page refresh. For example, if a user fills out a form which
+  requires a first name, but the user leaves these fields blank, they will be
+  presented with a message that says "First Name is Required".
 
-  For example, if a user fills out a form which requires a first name, but the
-  user leaves these fields blank, they will be presented with a message that
-  says "First Name is Required".
+  This module allows the validation messages to be sent back to the user
+  without a page refresh, so they appear in realtime. This makes for a more
+  streamlined user experience. If the submitted form has no errors, the page
+  will be redirected to the appropriate submission landing page.
 
-  This module allows the validation messages to be sent back to the user without
-  a page refresh, so they appear in realtime. This makes for a more streamlined
-  user experience. If the submitted form has no errors, the page will be
-  redirected to the appropriate submission landing page.
+  Some reasons you may want to use this module include...
+
+    * extremely simple setup. with most forms, it "just works".
+    * supports most forms with file uploads.
+    * supports Image module forms.
+    * supports forms with CAPTCHAs.
+    * supports comment forms.
+    * supports AJAX form previews.
+    * well-documented developer API with examples.
+    * supports ThickBox modal windows.
+    * supports user login and registration forms.
 
 ##
 ## USAGE
 ##
 
-  At the Drupal module admin page, enable the "Ajax forms" module and the
-  "Ajax forms ui" module. Also enable any other Ajax forms plugins that you
+  At the Drupal module admin page, enable the "Ajax" module and the
+  "Ajax ui" module. Also enable any other Ajax forms plugins that you
   may need to use.
   
   Next, go to "admin/settings/ajax" and select the forms for which you want to
@@ -53,7 +62,7 @@
 ## DEVELOPERS: PHP API
 ##
 
-  The AJAX Forms module will properly handle MOST forms out of the box. If,
+  Ajax.module will properly handle MOST forms out of the box. If,
   however, your forms require special or complex handling, a plugin/API system
   has been provided to allow for easy integration. A form can activated with
   AJAX functionality by specifying the '#ajax' property of the form...
@@ -62,7 +71,7 @@
       $form['#ajax'] = TRUE;
     }
 
-  AJAX Forms also provides the following module hooks:
+  Ajax.module also provides the following module hooks:
 
     hook_ajax_validate_fail (&$form, &$form_state, &$data)
     
@@ -97,14 +106,14 @@
       $form_id String
         A Drupal form ID
 
-  For more developer information, please see the example AJAX Forms plugins
+  For more developer information, please see the example Ajax plugins
   which are provided in the "ajax/plugins" directory.
 
 ##
 ## Developers: JavaScript API
 ##
 
-  The Ajax Forms JavaScript plugin provides the following plugin callbacks(s):
+  The Ajax.module JavaScript API provides the following plugin callbacks(s):
 
     Drupal.Ajax.plugins.FOO(hook, args)
 
@@ -122,19 +131,27 @@
     init
       On page load.
 
-  For Ajax Forms plugins usage examples, please see the "thickbox" and
-  "tinymce" plugins which are provided with the Ajax Forms module in the
-  "ajax/plugins" directory.
+  For Ajax.module JavaScript plugins usage examples, please see the
+  "thickbox" and "tinymce" plugins which are provided with Ajax.module
+  in the "ajax/plugins" directory.
 
 ##
 ## NOTES
 ##
 
-  This module will work out of the box with forms displayed in a Thickbox.
-  However, it will only work out of the box with the "AJAX Content" Thickbox,
-  NOT the "iFramed Content" Thickbox.
+  * This module will work with forms displayed in a Thickbox if you enable
+    the provided Thickbox plugin. However, it will only work with the
+    "AJAX Content" Thickbox, NOT the "iFramed Content" Thickbox.
 
-  This module will work with the Captcha module (6.x-1.0-rc2) using the
-  provided Captcha Plugin, but you must first apply a set of patches to the
-  captcha module which are provided in the "ajax/plugins/captcha/patches"
-  directory.
+  * This module will work with the Captcha module (6.x-1.0-rc2) using the
+    provided Captcha Plugin, but you must first apply a set of patches to
+    the captcha module which are provided in the "ajax/plugins/captcha/patches"
+    directory.
+
+  * If you are using the Image FUpload module, be careful not to enable the
+  "image" content type in the Ajax UI admin screen.
+
+  * This module will work with the Audio module, although the Audio module
+    may issue PHP warnings after uploading audio content.
+
+

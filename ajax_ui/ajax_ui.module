@@ -20,7 +20,7 @@
  */
 function ajax_ui_menu() {
   $items['admin/settings/ajax'] = array(
-    'title' => t('Ajax Forms Settings'),
+    'title' => t('Ajax Settings'),
     'description' => t('Controls which forms should use AJAX submissions.'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('ajax_ui_admin'),
