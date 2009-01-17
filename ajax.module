@@ -21,8 +21,8 @@
  * @return Bool
  */
 function ajax_init() {
-  drupal_add_js(drupal_get_path('module', 'ajax') .
-    '/Ajax.js', 'module');
+  drupal_add_js(drupal_get_path('module', 'ajax') . '/Ajax.js', 'module');
+  drupal_add_js('misc/jquery.form.js', 'module');
   return TRUE;
 }
 
@@ -274,7 +274,7 @@ function ajax_invoke_alter(&$form, &$form_state, $form_id) {
  * @return Bool
  */
 function ajax_validator(&$form, &$form_state) {
-  if (array_key_exists('ajax', $_REQUEST)) {
+  if (array_key_exists('HTTP_X_DRUPAL_AJAX', $_SERVER)) {
     drupal_get_messages(NULL, TRUE);
     $data = ajax_build(array(
       'messages_error' => form_get_errors()
