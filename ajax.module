@@ -16,13 +16,23 @@
 
 
 /**
- * hook_init
+ * Implementation of hook_preprocess_hook().
  *
+ * @param variables Assoc
  * @return Bool
+ *
  */
-function ajax_init() {
+function ajax_preprocess_page(&$variables) {
+  drupal_add_js(drupal_get_path('module', 'ajax') .
+    '/jquery/jquery.form.js', 'module');
   drupal_add_js(drupal_get_path('module', 'ajax') . '/Ajax.js', 'module');
-  drupal_add_js('misc/jquery.form.js', 'module');
+  $scripts = drupal_add_js();
+  foreach (array('module', 'theme') as $scope) {
+    if (array_key_exists('misc/jquery.form.js', $scripts[$scope])) {
+      unset($scripts[$scope]['misc/jquery.form.js']);
+    }
+  }
+  $variables['scripts'] = drupal_get_js('header', $scripts);
   return TRUE;
 }
 
@@ -305,7 +315,17 @@ function ajax_validator(&$form, &$form_state) {
 function ajax_out($data) {
   ob_clean();
   header('HTTP/1.1 200 OK', TRUE);
-  drupal_json($data);
+  if (!array_key_exists('HTTP_X_REQUESTED_WITH', $_SERVER) &&
+      $_SERVER['HTTP_X_REQUESTED_WITH'] !== 'XMLHttpRequest') {
+    drupal_set_header('Content-Type: text/html; Charset=UTF-8');
+    print "<textarea>";
+    print drupal_to_js($data);
+    print "</textarea>\n";
+  }
+  else {
+    drupal_set_header('Content-Type: text/javascript; Charset=UTF-8');
+    print drupal_to_js($data);
+  }
   exit;
 }
 
