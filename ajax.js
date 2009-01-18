@@ -113,7 +113,7 @@ Drupal.Ajax.go = function(formObj, submitter) {
       submitter.val(submitterVal);
       Drupal.Ajax.response(submitter, formObj, data);
       return true;
-    },
+    }
   });
   return false;
 }
