@@ -24,10 +24,20 @@ function ajax_ui_menu() {
     'description' => t('Controls which forms should use AJAX submissions.'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('ajax_ui_admin'),
-    'access arguments' => array('access administration pages'),
+    'access arguments' => array('administer ajax forms'),
     'type' => MENU_NORMAL_ITEM,
   );
   return $items;
+}
+
+/**
+ * Implementation of hook_perm().
+ *
+ * @return Array
+ *
+ */
+function ajax_ui_perm() {
+  return array('administer ajax forms');
 }
 
 /**
