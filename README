@@ -130,6 +130,11 @@
       Executes as window scrolls up after Ajax response.
     init
       On page load.
+    submit
+      Before form is submitted.
+    complete
+      After form submission is complete. If function returns true, page will
+      be redirected. If function returns false, no redirection will occur. 
 
   For Ajax.module JavaScript plugins usage examples, please see the
   "thickbox" and "tinymce" plugins which are provided with Ajax.module
