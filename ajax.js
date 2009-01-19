@@ -293,7 +293,9 @@ Drupal.Ajax.response = function(submitter, formObj, data){
     }
     // Redirect
     else {
-      window.location.href = data.redirect;
+      if (Drupal.Ajax.invoke('complete', data)) {
+        window.location.href = data.redirect;
+      }
     }
   }
   return true;
