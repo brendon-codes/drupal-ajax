@@ -30,7 +30,19 @@ function ajax_install() {
 }
 
 /**
+ * hook_uninstall
+ *
+ * @return Bool
+ */
+function ajax_uninstall() {
+  variable_del('ajax');
+  return TRUE;
+}
+
+/**
  * Update 1
+ *
+ * @return Array
  */
 function ajax_update_6100() {
   return array();
@@ -38,6 +50,8 @@ function ajax_update_6100() {
 
 /**
  * Update 2
+ *
+ * @return Array
  */
 function ajax_update_6101() {
   // Devel module likes to go last,
@@ -52,3 +66,15 @@ function ajax_update_6101() {
   );
   return $ret;
 }
+
+/**
+ * Update 3
+ *
+ * @return Array
+ */
+function ajax_update_6102() {
+  // This is no longer used
+  variable_del('ajax_types_default');
+  return array();
+}
+
