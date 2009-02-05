@@ -35,7 +35,18 @@ function ajax_ui_install() {
  * @return Bool
  */
 function ajax_ui_uninstall() {
-  variable_del('ajax_types_custom');
-  variable_del('ajax_types_default');
+  variable_del('ajax');
   return TRUE;
+}
+
+/**
+ * Update 3
+ *
+ * @return Array
+ */
+function ajax_ui_update_6100() {
+  // This is no longer used
+  variable_del('ajax_types_default');
+  variable_del('ajax_types_custom');
+  return array();
 }

@@ -30,16 +30,6 @@ function ajax_install() {
 }
 
 /**
- * hook_uninstall
- *
- * @return Bool
- */
-function ajax_uninstall() {
-  variable_del('ajax');
-  return TRUE;
-}
-
-/**
  * Update 1
  *
  * @return Array
@@ -65,16 +55,5 @@ function ajax_update_6101() {
     "  s.type = 'module' "
   );
   return $ret;
-}
-
-/**
- * Update 3
- *
- * @return Array
- */
-function ajax_update_6102() {
-  // This is no longer used
-  variable_del('ajax_types_default');
-  return array();
 }
 
