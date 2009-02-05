@@ -119,38 +119,137 @@ function ajax_ui_types_user() {
  * @return Assoc
  */
 function ajax_ui_admin() {
+  $settings = variable_get('ajax', NULL);
+  $types = ajax_ui_get_types();
+  $options = ajax_ui_get_options();
   $form = array(
-    'container_default' => array(
-      '#type' => 'fieldset',
-      '#title' => t('Default Forms'),
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
-      'ajax_types_default' => array(
-        '#type' => 'select',
-        '#multiple' => TRUE,
-        '#options' => ajax_ui_get_types(),
-        '#default_value' => variable_get('ajax_types_default', array()),
-        '#size' => 20,
-        '#description' => t(
-          "Select the default forms you wish to use AJAX submissions.")
-      )
+    'submit' => array(
+      '#type' => 'submit',
+      '#value' => t('Submit')
     ),
-    'container_custom' => array(
-      '#type' => 'fieldset',
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
-      '#title' => t('Custom Forms (Advanced)'),
-      'ajax_types_custom' => array(
-        '#type' => 'textarea',
-        '#default_value' => variable_get('ajax_types_custom', ''),
-        '#description' => t(
-          'Enter the form IDs of the custom forms you wish to ' .
-          'use AJAX Submissions. Enter one ID per line. Only alpha-numeric ' .
-          'characters should be used. ')
-      )
+    '#admin_options' => $options
+  );
+  foreach ($types as $type => $name) {
+    $form['types'][$type] = array(
+      '#value' => $name
+    );
+    $form['checkboxes'][$type] = array(
+      '#type' => 'checkboxes',
+      '#default_value' => array(),
+      '#options' => array()
+    );
+    foreach ($options as $option_k => $option_v) {
+      $form['checkboxes'][$type]['#options'][$option_k] = '';
+      // set default val for checkbox
+      if ($settings !== NULL) {
+        if (array_key_exists($type, $settings['types']['default'])) {
+          if (array_key_exists($option_k,
+              $settings['types']['default'][$type])) {
+            if ($settings['types']['default'][$type][$option_k]) {
+              $form['checkboxes'][$type]['#default_value'][$option_k] =
+                $option_k;
+            }
+          }
+        }
+      }
+    }
+  }
+  return $form;
+}
+
+/**
+ * Gets default UI/type options
+ *
+ * @return Array
+ */
+function ajax_ui_options_default() {
+  return array(
+    'enabled' => array(
+      '#value' => t('Enabled'),
+      '#advanced' => FALSE
+    ),
+    //'disable_redirect' => array(
+    //  '#value' => t('Disable Redirect'),
+    //  '#advanced' => TRUE
+    //)
+  );
+}
+
+/**
+ * Get admin UI/type options
+ *
+ * @return Assoc
+ */
+function ajax_ui_get_options() {
+  $opts = ajax_ui_options_default();
+  $out = array();
+  foreach ($opts as $opt_k => $opt_v) {
+    $out[$opt_k] = $opt_v;
+  }
+  return $out;
+}
+
+/**
+ * Handles admin submissions
+ *
+ * @param $form Assox
+ * @param $form_state Assoc
+ * @return unknown
+ */
+function ajax_ui_admin_submit($form, &$form_state) {
+  $out = array();
+  $out['types'] = array();
+  $out['types']['default'] = array();
+  foreach (element_children($form['checkboxes']) as $type) {
+    $out['types']['default'][$type] = array();
+    foreach (element_children($form['checkboxes'][$type]) as $option) {
+      $out['types']['default'][$type][$option] =
+        (bool)$form['checkboxes'][$type][$option]['#value'];
+    }
+  }
+  variable_set('ajax', $out);
+  return TRUE;
+}
+
+/**
+ * Theme for admin screen
+ *
+ */
+function theme_ajax_ui_admin($form) {
+  $header = array();
+  $rows = array();
+  $header[] = t('Form Name');
+  foreach ($form['#admin_options'] as $admin_option) {
+    $header[] = $admin_option['#value'];
+  }
+  foreach (element_children($form['types']) as $type) {
+    $row = array();
+    if (is_array($form['types'][$type])) {
+      $row[] = array('data' => drupal_render($form['types'][$type]));
+      foreach (element_children($form['checkboxes'][$type]) as $option) {
+        $row[] = array(
+          'data' => drupal_render($form['checkboxes'][$type][$option])
+        );
+      }
+      $rows[] = $row;
+    }
+  }
+  $output  = theme('table', $header, $rows);
+  $output .= drupal_render($form);
+  return $output;
+}
+
+/**
+ * Hook_theme
+ *
+ * @return Array
+ */
+function ajax_ui_theme() {
+  return array(
+    'ajax_ui_admin' => array(
+      'arguments' => array('form' => NULL)
     )
   );
-  return system_settings_form($form);
 }
 
 /**
@@ -161,26 +260,18 @@ function ajax_ui_admin() {
  * @return Bool
  */
 function ajax_ui_is_type($form, $form_id) {
-  // User defined forms
-  $exists = array_key_exists($form_id,
-    variable_get('ajax_types_default', array()));
-  if ($exists) {
-    return TRUE;
-  }
-  else {
-    $custom = variable_get('ajax_types_custom', FALSE);
-    if ($custom !== FALSE) {
-      $parts = preg_split("/[\r\n]+/", $custom, -1, PREG_SPLIT_NO_EMPTY);
-      if ($parts) {
-        foreach ($parts as $v) {
-          if (trim($v) === $form_id) {
-            return TRUE;
-          }
+  $settings = variable_get('ajax', NULL);
+  if ($settings !== NULL) {
+    if (array_key_exists($form_id, $settings['types']['default'])) {
+      if (array_key_exists('enabled',
+          $settings['types']['default'][$form_id])) {
+        if ($settings['types']['default'][$form_id]['enabled']) {
+          return TRUE;
         }
       }
     }
-    return FALSE;
   }
+  return FALSE;
 }
 
 /**
