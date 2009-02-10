@@ -1,0 +1,7 @@
+name = Ajax plugin - disable_redirect
+description = Allows form redirections to be disabled for Ajax forms
+package = Ajax
+dependencies[] = ajax
+dependencies[] = ajax_ui
+core = 6.x
+

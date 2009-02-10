@@ -185,34 +185,39 @@ Drupal.Ajax.scroller = function(submitter) {
  * @param {Object} submitter
  * @return {Bool}
  */
-Drupal.Ajax.message = function(messages, type, formObj, submitter) {
+Drupal.Ajax.message = function(formObj, submitter, options) {
   var i, _i, thisItem, log, errBox, h;
-  // Cleanups
-  $('.messages, .ajax-preview', formObj).remove();
-  $('input, textarea').removeClass('error status warning required');
-  // Preview
-  if (type === 'preview') {
-    log = $('<div>').addClass('ajax-preview');
-    log.html(messages);
-    formObj.prepend(log);
-  }
-  // Status, Error, Message
-  else {
-    log = $('<ul>');
-    errBox = $(".messages." + type, formObj[0])
-    for (i = 0, _i = messages.length; i < _i; i++) {
-      thisItem = $('#' + messages[i].id, formObj[0])
-      thisItem.addClass(type);
-      if (messages[i].required) {
-        thisItem.addClass('required');
+  if (options.action === 'notify') {
+    // Cleanups
+    $('.messages, .ajax-preview', formObj).remove();
+    $('input, textarea').removeClass('error status warning required');
+    // Preview
+    if (type === 'preview') {
+      log = $('<div>').addClass('ajax-preview');
+      log.html(options.messages);
+      formObj.prepend(log);
+    }
+    // Status, Error, Message
+    else {
+      log = $('<ul>');
+      errBox = $(".messages." + options.type, formObj[0])
+      for (i = 0, _i = options.messages.length; i < _i; i++) {
+        thisItem = $('#' + options.messages[i].id, formObj[0])
+        thisItem.addClass(options.type);
+        if (options.messages[i].required) {
+          thisItem.addClass('required');
+        }
+        log.append('<li>' + options.messages[i].value + '</li>');
       }
-      log.append('<li>' + messages[i].value + '</li>');
+      if (errBox.length === 0) {
+        errBox = $("<div class='messages " + options.type + "'>");
+        formObj.prepend(errBox);
+      }
+      errBox.html(log);
     }
-    if (errBox.length === 0) {
-      errBox = $("<div class='messages " + type + "'>");
-      formObj.prepend(errBox);
-    }
-    errBox.html(log);
+  }
+  else if (options.action === 'clear') {
+    $('.messages, .ajax-preview', formObj).remove();
   }
   Drupal.Ajax.scroller(submitter[0]);
   return true;
@@ -258,12 +263,20 @@ Drupal.Ajax.updater = function(updaters) {
  */
 Drupal.Ajax.response = function(submitter, formObj, data){
   var newSubmitter;
+  data.local = {
+    submitter : submitter,
+    form : formObj
+  }
   /**
    * Failure
    */
   if (data.status === false) {
     Drupal.Ajax.updater(data.updaters);
-    Drupal.Ajax.message(data.messages_error, 'error', formObj, submitter);
+    Drupal.Ajax.message(formObj, submitter, {
+      action : 'notify',
+      messages : data.messages_error,
+      type : 'error'
+    });
   }
   /**
    * Success
@@ -272,29 +285,41 @@ Drupal.Ajax.response = function(submitter, formObj, data){
     // Display preview
     if (data.preview !== null) {
       Drupal.Ajax.updater(data.updaters);
-      Drupal.Ajax.message(decodeURIComponent(data.preview), 'preview',
-        formObj, submitter);
+      Drupal.Ajax.message(formObj, submitter, {
+        action : 'notify',
+        messages : decodeURIComponent(data.preview),
+        type : 'preview'
+      });
     }
     // If no redirect, then simply show messages
     else if (data.redirect === null) {
       if (data.messages_status.length > 0) {
-        Drupal.Ajax.message(data.messages_status, 'status', formObj, submitter);
+        Drupal.Ajax.message(formObj, submitter, {
+          action : 'notify',
+          messages : data.messages_status,
+          type : 'status'
+        });
       }
       if (data.messages_warning.length > 0) {
-        Drupal.Ajax.message(data.messages_warning, 'warning', formObj, submitter);
+        Drupal.Ajax.message(formObj, submitter, {
+          action : 'notify',
+          messages : data.messages_warning,
+          type : 'warning'
+        });
       }
       if (data.messages_status.length === 0 &&
           data.messages_warning.length === 0) {
-        Drupal.Ajax.message([{
-          id : 0,
-          value : Drupal.t('Submission Complete')
-        }], 'status', formObj, submitter);
+        Drupal.Ajax.message(formObj, submitter, {action:'clear'});
       }
     }
     // Redirect
     else {
       if (Drupal.Ajax.invoke('complete', data)) {
         window.location.href = data.redirect;
+      }
+      else {
+        Drupal.Ajax.updater(data.updaters);
+        Drupal.Ajax.message(formObj, submitter, {action:'clear'});
       }
     }
   }
