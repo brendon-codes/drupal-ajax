@@ -1,0 +1,10 @@
+This is the old "patches" directory, and cannot be removed for
+various reasons explained here:
+
+  http://drupal.org/node/94172
+
+Currently, when patches are available, they will reside in a
+"patches" directory under the appropriate plugin. For example,
+the captcha patches would be located in:
+
+  "plugins/captcha/patches"
