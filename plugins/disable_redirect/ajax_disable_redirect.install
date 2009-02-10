@@ -1,0 +1,22 @@
+<?php
+ /**
+ * Automatic AJAX forms validation, preview, and submission
+ *
+ * @see http://drupal.org/project/ajax
+ * @see irc://freenode.net/#drupy
+ * @depends Drupal 6
+ * @author brendoncrawford
+ * @note This file uses a 79 character width limit.
+ *
+ */
+
+ /**
+ * hook_uninstall
+ *
+ * @return Bool
+ */
+function ajax_disable_redirect_uninstall() {
+  ajax_ui_var_del(array('disable_redirect', 'remove_form'));
+  return TRUE;
+}
+

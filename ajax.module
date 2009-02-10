@@ -46,7 +46,7 @@ function ajax_preprocess_page(&$variables) {
  * @return Bool
  */
 function ajax_form_alter(&$form, $form_state, $form_id) {
-  if (array_key_exists('#ajax', $form) && $form['#ajax']) {
+  if (ajax_is_enabled($form)) {
     $found = array('submitter' => FALSE);
     ajax_invoke_alter($form, $form_state, $form_id);
     ajax_validator_set($form);
@@ -54,6 +54,21 @@ function ajax_form_alter(&$form, $form_state, $form_id) {
     ajax_submitter_set($form, $found);
   }
   return TRUE;
+}
+
+/**
+ * Checks if form is ajax-enabled
+ *
+ * @param $form Assoc
+ * @return Bool
+ */
+function ajax_is_enabled($form) {
+  return (
+    array_key_exists('#ajax', $form) &&
+    is_array($form['#ajax']) &&
+    array_key_exists('enabled', $form['#ajax']) &&
+    $form['#ajax']['enabled'] === TRUE
+  );
 }
 
 
@@ -197,7 +212,8 @@ function ajax_get_redirect($redirect) {
  */
 function ajax_submitter(&$form, &$form_state) {
   $data = array(
-    'form_id' => $form_state['values']['form_id']
+    'form_id' => $form_state['values']['form_id'],
+    'options' => $form['#ajax']
   );
   // Node Preview
   if (array_key_exists('node_preview', $form_state) &&
@@ -291,7 +307,8 @@ function ajax_validator(&$form, &$form_state, $form_id) {
     drupal_get_messages(NULL, TRUE);
     $data = ajax_build(array(
       'messages_error' => form_get_errors(),
-      'form_id' => $form_state['values']['form_id']
+      'form_id' => $form_state['values']['form_id'],
+      'options' => $form['#ajax']
     ));
     // FAIL
     if (!$data['status']) {
@@ -363,7 +380,8 @@ function ajax_build($data) {
     'messages_warning' => array(),
     'redirect' => NULL,
     'preview' => NULL,
-    'form_id' => NULL
+    'form_id' => NULL,
+    'options' => array()
   );
   // MESSAGE:ERROR
   if (array_key_exists('messages_error', $data) &&
@@ -415,6 +433,10 @@ function ajax_build($data) {
   // Form ID
   if (array_key_exists('form_id', $data) && $data['form_id'] !== NULL) {
     $out['form_id'] = $data['form_id'];
+  }
+  // Misc Admin Options to Send to Client
+  if (array_key_exists('options', $data) && $data['options'] !== NULL) {
+    $out['options'] = $data['options'];
   }
   return $out;
 }
