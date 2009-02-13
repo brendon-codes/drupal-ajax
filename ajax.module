@@ -152,11 +152,7 @@ function ajax_submitter_find(&$form, &$found) {
   foreach ($form as $form_key => $form_val) {
     if (is_array($form[$form_key])) {
       //submit or preview button
-      if (
-          (array_key_exists('#type', $form[$form_key]) &&
-          ($form[$form_key]['#type'] === 'submit' ||
-          $form[$form_key]['#type'] === 'button')) &&
-          ($form_key === 'submit' || $form_key === 'preview')) {
+      if (ajax_is_submitter($form, $form_key)) {
         $form[$form_key]['#attributes']['class'] = 'ajax-trigger';
         if (array_key_exists('#submit', $form[$form_key]) &&
             !empty($form[$form_key]['#submit'])) {
@@ -171,6 +167,36 @@ function ajax_submitter_find(&$form, &$found) {
     }
   }
   return TRUE;
+}
+
+/**
+ * Determines if item is a submitter
+ *
+ * @param $form Assoc
+ * @param $form_key
+ * @return Bool
+ *
+ */
+function ajax_is_submitter($form, $form_key) {
+  $is = FALSE;
+  if (array_key_exists('#type', $form[$form_key])) {
+    if (
+      $form[$form_key]['#type'] === 'submit' ||
+      $form[$form_key]['#type'] === 'button'
+    ) {
+      if ($form_key === 'submit' || $form_key === 'preview') {
+        $is = TRUE;
+      }
+      elseif (array_key_exists('#ajax', $form[$form_key])) {
+        if (array_key_exists('submitter', $form[$form_key]['#ajax'])) {
+          if ($form[$form_key]['#ajax']['submitter'] === TRUE) {
+            $is = TRUE;
+          }
+        }
+      }
+    }
+  }
+  return $is;
 }
 
 /**
