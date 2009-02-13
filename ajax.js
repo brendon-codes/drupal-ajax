@@ -192,7 +192,7 @@ Drupal.Ajax.message = function(formObj, submitter, options) {
     $('.messages, .ajax-preview', formObj).remove();
     $('input, textarea').removeClass('error status warning required');
     // Preview
-    if (type === 'preview') {
+    if (options.type === 'preview') {
       log = $('<div>').addClass('ajax-preview');
       log.html(options.messages);
       formObj.prepend(log);
