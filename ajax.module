@@ -46,7 +46,7 @@ function ajax_preprocess_page(&$variables) {
  * @return Bool
  */
 function ajax_form_alter(&$form, $form_state, $form_id) {
-  if (ajax_is_enabled($form)) {
+  if (ajax_is_enabled($form) && !$form['#programmed']) {
     $found = array('submitter' => FALSE);
     ajax_invoke_alter($form, $form_state, $form_id);
     ajax_validator_set($form);
