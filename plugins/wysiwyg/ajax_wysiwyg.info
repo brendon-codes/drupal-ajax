@@ -1,0 +1,7 @@
+name = Ajax plugin - wysiwyg
+description = Enables AJAX functionality for wysiwyg API
+package = Ajax
+dependencies[] = ajax
+dependencies[] = wysiwyg
+core = 6.x
+
