@@ -315,7 +315,7 @@ Drupal.Ajax.response = function(submitter, formObj, data){
     // Redirect
     else {
       if (Drupal.Ajax.invoke('complete', data)) {
-        window.location.href = data.redirect;
+        Drupal.Ajax.redirect( data.redirect );
       }
       else {
         Drupal.Ajax.updater(data.updaters);
@@ -324,6 +324,88 @@ Drupal.Ajax.response = function(submitter, formObj, data){
     }
   }
   return true;
+}
+
+/**
+ * Parses a url into parts
+ * 
+ * @param {String} url
+ * @return {Object}
+ */
+Drupal.Ajax.parse_url = function(url) {
+  var p1, p2, p3, p4, out, i;
+  out = {};
+  p1 = url.split(/#/);
+  // fragment
+  if (p1[1]) {
+    out.fragment = p1[1];
+  }
+  else {
+    out.fragment = null;
+  }
+  p2 = p1[0].split(/\?/);
+  // query
+  out.query = {};
+  if (p2[1]) {
+    p3 = p2[1].split(/(&amp;|&|;)/);
+    for (i = 0; i < p3.length; i++) {
+      p4 = p3[i].split(/=/);
+      out.query[p4[0]] = true;
+      if (p4[1]) {
+        out.query[p4[0]] = p4[1];
+      }
+    }
+  }
+  // url
+  out.url = p2[0].replace(/\/$/, '');
+  return out;
+}
+
+/**
+ * Creates a url from parts
+ * 
+ * @param {Object} url_obj
+ * @return {String}
+ */
+Drupal.Ajax.create_url = function(url_obj) {
+  var out, q, i;
+  out = url_obj.url;
+  i = 0;
+  for (q in url_obj.query) {
+    if (i > 0) {
+      out += '&amp;';
+    }
+    else {
+      out += '?';
+    }
+    out += q.toString();
+    out += '=';
+    out += url_obj.query[q].toString();
+    i++;
+  }
+  if (url_obj.fragment !== null) {
+    out += '#';
+    out += url_obj.fragment;
+  }
+  return out;
+}
+
+/**
+ * Redirects to appropriate page
+ * 
+ * @todo
+ *   Some of this functionality should possibly hapen on
+ *   the server instead of client.
+ * @param {String} url
+ */
+Drupal.Ajax.redirect = function(url) {
+  var u, r, n;
+  u = Drupal.Ajax.parse_url(url);
+  r = Math.ceil(Math.random() * 99999999).toString();
+  u.query[r] = 1;
+  u.fragment = null;
+  n = Drupal.Ajax.create_url(u);
+  window.location.href = n;
 }
 
 Drupal.behaviors.Ajax = Drupal.Ajax.init;
