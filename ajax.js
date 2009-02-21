@@ -26,6 +26,7 @@ Drupal.Ajax.firstRun = false;
  */
 Drupal.Ajax.init = function(context) {
   var f, s;
+  console.log('hello world');
   if (f = $('.ajax-form', context)) {
     if (!Drupal.Ajax.firstRun) {
       Drupal.Ajax.invoke('init');
