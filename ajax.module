@@ -226,7 +226,66 @@ function ajax_get_redirect($redirect) {
   else {
     $path = $redirect;
   }
-  return url($path, $args);
+  $n = url($path, $args);
+  $u = ajax_get_url($n);
+  $u['query'][mt_rand()] = 1;
+  $u['fragment'] = NULL;
+  $out = ajax_build_url($u);
+  return $out;
+}
+
+/**
+ * Builds a URL
+ *
+ * @param Assoc
+ * @return String
+ */
+function ajax_build_url($u) {
+  $out = '';
+  if (!empty($u['scheme'])) {
+    $out .= $u['scheme'];
+  }
+  else {
+    $out .= 'http';
+  }
+  $out .= '://';
+  if (!empty($u['user'])) {
+    $out .= $u['user'];
+    if (!empty($u['pass'])) {
+      $out .= ':';
+      $out .= $u['pass'];
+    }
+    $out .= '@';
+  }
+  $out .= $u['host'];
+  $out .= $u['path'];
+  if (!empty($u['query'])) {
+    $out .= '?';
+    $out .= drupal_query_string_encode($u['query']);
+  }
+  if (!empty($u['fragment'])) {
+    $out .= '#';
+    $out .= $u['fragment'];
+  }
+  return $out;
+}
+
+/**
+ * Gets url parts
+ *
+ * @param $url String
+ * @return Asoc
+ */
+function ajax_get_url($url) {
+  $p = parse_url($url);
+  if (!empty($p['query'])) {
+    parse_str($p['query'], $q);
+    $p['query'] = $q;
+  }
+  else {
+    $p['query'] = array();
+  }
+  return $p;
 }
 
 /**
