@@ -177,15 +177,37 @@ Drupal.Ajax.scroller = function(submitter) {
 }
 
 /**
- * Handles return message
+ * Handles messaging
  * 
- * @param {Object} messages
- * @param {Object} type
  * @param {Object} formObj
  * @param {Object} submitter
+ * @param {Object} data
+ * @param {Object} options
  * @return {Bool}
  */
-Drupal.Ajax.message = function(formObj, submitter, options) {
+Drupal.Ajax.message = function(formObj, submitter, data, options) {
+  var args;
+  args = {
+    formObj : formObj,
+    submitter : submitter,
+    data : data,
+    options : options
+  }
+  if (Drupal.Ajax.invoke('message', args)) {
+    Drupal.Ajax.writeMessage(args.formObj, args.submitter, args.options);
+  }
+  return true;
+}
+
+/**
+ * Writes message
+ * 
+ * @param {Object} formObj
+ * @param {Object} submitter
+ * @param {Object} options
+ * @return {Bool}
+ */
+Drupal.Ajax.writeMessage = function(formObj, submitter, options) {
   var i, _i, thisItem, log, errBox, h;
   if (options.action === 'notify') {
     // Cleanups
@@ -272,7 +294,7 @@ Drupal.Ajax.response = function(submitter, formObj, data){
    */
   if (data.status === false) {
     Drupal.Ajax.updater(data.updaters);
-    Drupal.Ajax.message(formObj, submitter, {
+    Drupal.Ajax.message(formObj, submitter, data, {
       action : 'notify',
       messages : data.messages_error,
       type : 'error'
@@ -285,7 +307,7 @@ Drupal.Ajax.response = function(submitter, formObj, data){
     // Display preview
     if (data.preview !== null) {
       Drupal.Ajax.updater(data.updaters);
-      Drupal.Ajax.message(formObj, submitter, {
+      Drupal.Ajax.message(formObj, submitter, data, {
         action : 'notify',
         messages : decodeURIComponent(data.preview),
         type : 'preview'
@@ -294,14 +316,14 @@ Drupal.Ajax.response = function(submitter, formObj, data){
     // If no redirect, then simply show messages
     else if (data.redirect === null) {
       if (data.messages_status.length > 0) {
-        Drupal.Ajax.message(formObj, submitter, {
+        Drupal.Ajax.message(formObj, submitter, data, {
           action : 'notify',
           messages : data.messages_status,
           type : 'status'
         });
       }
       if (data.messages_warning.length > 0) {
-        Drupal.Ajax.message(formObj, submitter, {
+        Drupal.Ajax.message(formObj, submitter, data, {
           action : 'notify',
           messages : data.messages_warning,
           type : 'warning'
@@ -309,7 +331,7 @@ Drupal.Ajax.response = function(submitter, formObj, data){
       }
       if (data.messages_status.length === 0 &&
           data.messages_warning.length === 0) {
-        Drupal.Ajax.message(formObj, submitter, {action:'clear'});
+        Drupal.Ajax.message(formObj, submitter, data, {action:'clear'});
       }
     }
     // Redirect
@@ -319,7 +341,7 @@ Drupal.Ajax.response = function(submitter, formObj, data){
       }
       else {
         Drupal.Ajax.updater(data.updaters);
-        Drupal.Ajax.message(formObj, submitter, {action:'clear'});
+        Drupal.Ajax.message(formObj, submitter, data, {action:'clear'});
       }
     }
   }
