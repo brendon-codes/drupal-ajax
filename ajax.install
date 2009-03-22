@@ -20,11 +20,11 @@ function ajax_install() {
   // Devel module likes to go last,
   // so we will go right before the devel module
   db_query(
-    "UPDATE {system} s SET " .
-    "  s.weight = 87 " .
+    "UPDATE system SET " .
+    "  system.weight = 87 " .
     "WHERE " .
-    "  s.name = 'ajax' AND " .
-    "  s.type = 'module' "
+    "  system.name = 'ajax' AND " .
+    "  system.type = 'module' "
   );
   return TRUE;
 }
@@ -48,11 +48,11 @@ function ajax_update_6101() {
   // so we will go right before the devel module
   $ret = array();
   $ret[] = update_sql(
-    "UPDATE {system} s SET " .
-    "  s.weight = 87 " .
+    "UPDATE system SET " .
+    "  system.weight = 87 " .
     "WHERE " .
-    "  s.name = 'ajax' AND " .
-    "  s.type = 'module' "
+    "  system.name = 'ajax' AND " .
+    "  system.type = 'module' "
   );
   return $ret;
 }
