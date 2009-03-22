@@ -296,6 +296,7 @@ function ajax_get_url($url) {
  * @return Bool
  */
 function ajax_submitter(&$form, &$form_state) {
+  $messages = drupal_get_messages(NULL, TRUE);
   $data = array(
     'form_id' => $form_state['values']['form_id'],
     'options' => $form['#ajax']
@@ -310,15 +311,13 @@ function ajax_submitter(&$form, &$form_state) {
       $form_state['redirect'] !== NULL) {
     $data['redirect'] = $form_state['redirect'];
   }
-  // Display messages internally without redirect
-  else {
-    $messages = drupal_get_messages(NULL, TRUE);
-    if (array_key_exists('status', $messages)) {
-      $data['messages_status'] = $messages['status'];
-    }
-    if (array_key_exists('warning', $messages)) {
-      $data['messages_warning'] = $messages['warning'];
-    }
+  // Messages: Status
+  if (array_key_exists('status', $messages)) {
+    $data['messages_status'] = $messages['status'];
+  }
+  // Messages warning
+  if (array_key_exists('warning', $messages)) {
+    $data['messages_warning'] = $messages['warning'];
   }
   $out = ajax_build($data);
   ajax_out($out);

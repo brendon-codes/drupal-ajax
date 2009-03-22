@@ -341,7 +341,17 @@ Drupal.Ajax.response = function(submitter, formObj, data){
       }
       else {
         Drupal.Ajax.updater(data.updaters);
-        Drupal.Ajax.message(formObj, submitter, data, {action:'clear'});
+        if (data.messages_status.length === 0 &&
+            data.messages_warning.length === 0) {
+          Drupal.Ajax.message(formObj, submitter, data, {action:'clear'});
+        }
+        else {
+          Drupal.Ajax.message(formObj, submitter, data, {
+            action : 'notify',
+            messages : data.messages_status,
+            type : 'status'
+          });
+        }
       }
     }
   }
