@@ -26,7 +26,6 @@ Drupal.Ajax.firstRun = false;
  */
 Drupal.Ajax.init = function(context) {
   var f, s;
-  console.log('hello world');
   if (f = $('.ajax-form', context)) {
     if (!Drupal.Ajax.firstRun) {
       Drupal.Ajax.invoke('init');
@@ -82,7 +81,7 @@ Drupal.Ajax.invoke = function(hook, args) {
  */
 Drupal.Ajax.go = function(formObj, submitter) {
   var submitterVal, submitterName, extraData;
-  Drupal.Ajax.invoke('submit');
+  Drupal.Ajax.invoke('submit', {submitter:submitter});
   submitterVal = submitter.val();
   submitterName = submitter.attr('name');
   submitter.val(Drupal.t('Loading...'));
