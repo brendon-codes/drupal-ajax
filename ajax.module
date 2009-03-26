@@ -303,13 +303,18 @@ function ajax_submitter(&$form, &$form_state) {
   );
   // Node Preview
   if (array_key_exists('node_preview', $form_state) &&
-      $form_state['node_preview'] !== NULL) {
+      !empty($form_state['node_preview'])) {
     $data['preview'] = $form_state['node_preview'];
   }
-  // Go to redirection page
+  // form_state:redirect
   if (array_key_exists('redirect', $form_state) &&
-      $form_state['redirect'] !== NULL) {
+      !empty($form_state['redirect'])) {
     $data['redirect'] = $form_state['redirect'];
+  }
+  // form:redirect
+  if (array_key_exists('redirect', $form) &&
+      !empty($form_state['redirect'])) {
+    $data['redirect'] = $form['redirect'];
   }
   // Messages: Status
   if (array_key_exists('status', $messages)) {
