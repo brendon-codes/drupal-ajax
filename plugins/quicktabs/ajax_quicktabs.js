@@ -26,11 +26,13 @@
 Drupal.Ajax.plugins.quicktabs = function(hook, args) {
   var quicktabs_original;
   if (hook === 'init') {
-    quicktabs_original = Drupal.quicktabs.tab.prototype.success;
-    Drupal.quicktabs.tab.prototype.success = function(data){
-      this.quicktabs_original = quicktabs_original;
-      this.quicktabs_original(data);
-      Drupal.attachBehaviors(data.container);
+    if (Drupal.quicktabs) {
+      quicktabs_original = Drupal.quicktabs.tab.prototype.success;
+      Drupal.quicktabs.tab.prototype.success = function(data){
+        this.quicktabs_original = quicktabs_original;
+        this.quicktabs_original(data);
+        Drupal.attachBehaviors(data.container);
+      }
     }
   }
   return true;
