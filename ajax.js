@@ -53,7 +53,7 @@ Drupal.Ajax.init = function(context) {
       return true;
     });
   }
-  return false;
+  return true;
 }
 
 /**
