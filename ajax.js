@@ -88,7 +88,7 @@ Drupal.Ajax.go = function(formObj, submitter) {
   extraData = {};
   extraData[submitterName] = submitterVal;
   extraData['drupal_ajax'] = '1';
-  formObj.ajaxSubmit({
+  formObj.a_ajaxSubmit({
     extraData : extraData,
     beforeSubmit : function(data) {
       data[data.length] = {
