@@ -41,12 +41,35 @@ function ajax_preprocess_page(&$variables) {
  * @return Bool
  */
 function ajax_form_alter(&$form, $form_state, $form_id) {
+  ajax_form_configure($form, $form_state, $form_id);
   if (ajax_is_enabled($form) && !$form['#programmed']) {
     $found = array('submitter' => FALSE);
     ajax_invoke_alter($form, $form_state, $form_id);
     ajax_validator_set($form);
     ajax_submitter_find($form, $found);
     ajax_submitter_set($form, $found);
+  }
+  return TRUE;
+}
+
+/**
+ * Adds warnings to various configuration forms
+ *
+ * @param $form
+ * @param $form_state
+ * @param $form_id
+ * @return unknown_type
+ */
+function ajax_form_configure(&$form, $form_state, $form_id) {
+  if ($form_id === 'node_configure') {
+    $form['node_preview']['#description'] .=
+      "&nbsp;" .
+      "<span style='color:#F00;'>" .
+      t(
+        'Setting this option to "Required" will conflict with Ajax ' .
+        'form submissions. '
+      ) .
+      "</span>";
   }
   return TRUE;
 }
