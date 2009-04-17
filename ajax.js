@@ -63,14 +63,15 @@ Drupal.Ajax.init = function(context) {
  * @param {Object} submitter
  */
 Drupal.Ajax.invoke = function(hook, args) {
-  var plugin, r;
+  var plugin, r, ret;
+  ret = true;
   for (plugin in Drupal.Ajax.plugins) {
     r = Drupal.Ajax.plugins[plugin](hook, args);
     if (r === false) {
-      return false;
+      ret = false;
     }
   }
-  return true;
+  return ret;
 }
 
 /**
