@@ -46,3 +46,4 @@ function ajax_logintoboggan_ajax_alter(&$form, &$form_state, $form_id) {
     return FALSE;
   }
 }
+
