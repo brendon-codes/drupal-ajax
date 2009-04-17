@@ -25,6 +25,9 @@ Drupal.Ajax.plugins.disable_redirect = function(hook, args) {
       if (args.options.remove_form === true) {
         args.local.form.remove();
       }
+      else {
+        $('.form-item :input', args.local.form[0])[0].focus();
+      }
       return false;
     }
   }
