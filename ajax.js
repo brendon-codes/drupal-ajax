@@ -54,7 +54,7 @@ Drupal.Ajax.init = function(context) {
     });
   }
   return true;
-}
+};
 
 /**
  * Invokes plugins
@@ -72,7 +72,7 @@ Drupal.Ajax.invoke = function(hook, args) {
     }
   }
   return ret;
-}
+};
 
 /**
  * Handles submission
@@ -95,11 +95,11 @@ Drupal.Ajax.go = function(formObj, submitter) {
       data[data.length] = {
         name : submitterName,
         value : submitterVal
-      }
+      };
       data[data.length] = {
         name : 'drupal_ajax',
         value : '1'
-      }
+      };
       return true;
     },
     dataType : 'json',
@@ -117,7 +117,7 @@ Drupal.Ajax.go = function(formObj, submitter) {
     }
   });
   return false;
-}
+};
 
 /**
  * Handles scroller
@@ -175,7 +175,7 @@ Drupal.Ajax.scroller = function(submitter) {
     return true;
   }, 100);
   return true;
-}
+};
 
 /**
  * Handles messaging
@@ -193,12 +193,12 @@ Drupal.Ajax.message = function(formObj, submitter, data, options) {
     submitter : submitter,
     data : data,
     options : options
-  }
+  };
   if (Drupal.Ajax.invoke('message', args)) {
     Drupal.Ajax.writeMessage(args.formObj, args.submitter, args.options);
   }
   return true;
-}
+};
 
 /**
  * Writes message
@@ -244,7 +244,7 @@ Drupal.Ajax.writeMessage = function(formObj, submitter, options) {
   }
   Drupal.Ajax.scroller(submitter[0]);
   return true;
-}
+};
 
 /**
  * Updates message containers
@@ -274,7 +274,7 @@ Drupal.Ajax.updater = function(updaters) {
     }
   }
   return true;
-}
+};
 
 /**
  * Handles data response
@@ -289,7 +289,7 @@ Drupal.Ajax.response = function(submitter, formObj, data){
   data.local = {
     submitter : submitter,
     form : formObj
-  }
+  };
   /**
    * Failure
    */
@@ -357,7 +357,7 @@ Drupal.Ajax.response = function(submitter, formObj, data){
     }
   }
   return true;
-}
+};
 
 
 /**
@@ -370,7 +370,7 @@ Drupal.Ajax.response = function(submitter, formObj, data){
  */
 Drupal.Ajax.redirect = function(url) {
   window.location.href = url;
-}
+};
 
 Drupal.behaviors.Ajax = Drupal.Ajax.init;
 
