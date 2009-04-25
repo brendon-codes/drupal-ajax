@@ -409,7 +409,7 @@ function ajax_invoke_alter(&$form, &$form_state, $form_id) {
  * @param $form_state Assoc
  * @return Bool
  */
-function ajax_validator(&$form, &$form_state, $form_id) {
+function ajax_validator(&$form, &$form_state) {
   if (array_key_exists('drupal_ajax', $_REQUEST)) {
     drupal_get_messages(NULL, TRUE);
     $data = ajax_build(array(
