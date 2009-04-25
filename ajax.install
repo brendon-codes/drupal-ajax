@@ -18,7 +18,7 @@
  */
 function ajax_install() {
   db_query(
-    "UPDATE {system} SET " .
+    "UPDATE {system} s SET " .
     "  s.weight = 81 " .
     "WHERE " .
     "  s.name = 'ajax' AND " .
