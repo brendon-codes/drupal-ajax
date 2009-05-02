@@ -19,7 +19,7 @@
  * @return {Bool}
  */
 Drupal.Ajax.plugins.disable_redirect = function(hook, args) {
-  if (hook === 'complete') {
+  if (hook === 'redirect') {
     if (args.options.disable_redirect === true) {
       args.local.form[0].reset();
       //IE

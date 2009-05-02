@@ -1,0 +1,6 @@
+name = Ajax plugin - scroller
+description = Allows a form to scroll up after an Ajax form submission.
+package = Ajax
+dependencies[] = ajax
+core = 6.x
+
