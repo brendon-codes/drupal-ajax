@@ -120,64 +120,6 @@ Drupal.Ajax.go = function(formObj, submitter) {
 };
 
 /**
- * Handles scroller
- * 
- * @param {Object} submitter
- * @return {Bool}
- */
-Drupal.Ajax.scroller = function(submitter) {
-  var scroll_weight, box, found, timer;
-  scroll_weight = 100;
-  timer = window.setInterval(function() {
-    box = submitter;
-    found = false;
-    // Watch for thickbox
-    while (box.parentNode !== null &&
-        Drupal.Ajax.invoke('scrollFind', {container:box})) {
-      box = box.parentNode;
-      // Document
-      if (box === document) {
-        if (box.documentElement.scrollTop &&
-            box.documentElement.scrollTop > 0) {
-          box.documentElement.scrollTop -= scroll_weight;
-          found = true;
-        }
-      }
-      // Body
-      else if (box === document.body) {
-        if (box.scrollTop &&
-            box.scrollTop > 0) {
-          box.scrollTop -= scroll_weight;
-          found = true;
-        }
-      }
-      // Window
-      else if (box === window) {
-        if ((window.pageYOffset && window.pageYOffset > 0) ||
-            (window.scrollY && window.scrollY > 0)) {
-          window.scrollBy(0, -scroll_weight);
-          found = true;
-        }
-      }
-      // Any other element
-      else {
-        if (box.scrollTop &&
-            box.scrollTop > 0) {
-          box.scrollTop -= scroll_weight;
-          found = true;
-        }
-      }
-    }
-    // Check if completed
-    if (!found) {
-      window.clearInterval(timer);
-    }
-    return true;
-  }, 100);
-  return true;
-};
-
-/**
  * Handles messaging
  * 
  * @param {Object} formObj
@@ -188,14 +130,13 @@ Drupal.Ajax.scroller = function(submitter) {
  */
 Drupal.Ajax.message = function(formObj, submitter, data, options) {
   var args;
-  args = {
-    formObj : formObj,
+  data.local = {
     submitter : submitter,
-    data : data,
-    options : options
+    form : formObj,
   };
-  if (Drupal.Ajax.invoke('message', args)) {
-    Drupal.Ajax.writeMessage(args.formObj, args.submitter, args.options);
+  if (Drupal.Ajax.invoke('message', data)) {
+    Drupal.Ajax.writeMessage(data.local.form, data.local.submitter, options);
+    Drupal.Ajax.invoke('afterMessage', data);
   }
   return true;
 };
@@ -209,7 +150,7 @@ Drupal.Ajax.message = function(formObj, submitter, data, options) {
  * @return {Bool}
  */
 Drupal.Ajax.writeMessage = function(formObj, submitter, options) {
-  var i, _i, thisItem, log, errBox, h;
+  var i, _i, thisItem, log, errBox, h, data;
   if (options.action === 'notify') {
     // Cleanups
     $('.messages, .ajax-preview', formObj).remove();
@@ -242,7 +183,6 @@ Drupal.Ajax.writeMessage = function(formObj, submitter, options) {
   else if (options.action === 'clear') {
     $('.messages, .ajax-preview', formObj).remove();
   }
-  Drupal.Ajax.scroller(submitter[0]);
   return true;
 };
 
@@ -337,7 +277,7 @@ Drupal.Ajax.response = function(submitter, formObj, data){
     }
     // Redirect
     else {
-      if (Drupal.Ajax.invoke('complete', data)) {
+      if (Drupal.Ajax.invoke('redirect', data)) {
         Drupal.Ajax.redirect( data.redirect );
       }
       else {
