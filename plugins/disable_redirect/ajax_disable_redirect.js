@@ -22,6 +22,8 @@ Drupal.Ajax.plugins.disable_redirect = function(hook, args) {
   if (hook === 'complete') {
     if (args.options.disable_redirect === true) {
       args.local.form[0].reset();
+      //IE
+      $('.form-item select', args.local.form[0]).attr('selectedIndex', 0);
       if (args.options.remove_form === true) {
         args.local.form.remove();
       }
