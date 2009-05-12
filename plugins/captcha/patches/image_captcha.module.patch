@@ -1,5 +1,5 @@
---- image_captcha/image_captcha.module	2008-11-14 09:45:54.000000000 -0800
-+++ image_captcha/image_captcha.module.new	2008-11-14 02:41:10.000000000 -0800
+--- image_captcha/image_captcha.module.orig	2008-11-14 09:45:54.000000000 -0800
++++ image_captcha/image_captcha.module	2008-11-14 02:41:10.000000000 -0800
 @@ -133,11 +133,14 @@ function image_captcha_captcha($op, $cap
          $seed = mt_rand();
          $_SESSION['image_captcha'][$seed] = $code;
