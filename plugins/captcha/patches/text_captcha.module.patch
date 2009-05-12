@@ -1,5 +1,5 @@
---- text_captcha/text_captcha.module	2008-11-14 09:46:15.000000000 -0800
-+++ text_captcha/text_captcha.module.new	2008-11-14 02:40:50.000000000 -0800
+--- text_captcha/text_captcha.module.orig	2008-11-14 09:46:15.000000000 -0800
++++ text_captcha/text_captcha.module	2008-11-14 02:40:50.000000000 -0800
 @@ -52,11 +52,14 @@ function text_captcha_captcha($op, $capt
          $key = array_rand($words, 1);
          $answer = $words[$key];

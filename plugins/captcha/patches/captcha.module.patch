@@ -1,5 +1,5 @@
---- captcha.module	2008-11-14 02:28:11.000000000 -0800
-+++ captcha.module.new	2008-11-14 03:02:59.000000000 -0800
+--- captcha.module.orig	2008-11-14 02:28:11.000000000 -0800
++++ captcha.module	2008-11-14 03:02:59.000000000 -0800
 @@ -240,7 +240,14 @@ function captcha_form_alter(&$form, $for
        '#type' => 'value',
        '#value' => $captcha['solution'],
