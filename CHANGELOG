@@ -7,3 +7,8 @@
    Be sure to update your config accordingly.
  * Changed args structure to 'message' hook. Be sure to
    update your plugins accordingly.
+
+2009-05-12
+
+ * Minor documentation additions to captcha patches README
+ * Minor text changes to ajax_ui and ajax_scroller info descriptions
