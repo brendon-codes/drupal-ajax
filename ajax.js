@@ -132,7 +132,7 @@ Drupal.Ajax.message = function(formObj, submitter, data, options) {
   var args;
   data.local = {
     submitter : submitter,
-    form : formObj,
+    form : formObj
   };
   if (Drupal.Ajax.invoke('message', data)) {
     Drupal.Ajax.writeMessage(data.local.form, data.local.submitter, options);
