@@ -140,7 +140,12 @@ function ajax_path_info($val) {
  */
 function ajax_validator_set(&$form) {
   $form['#validate'][] = 'ajax_validator';
-  $form['#attributes']['class'] = 'ajax-form';
+  if (empty($form['#attributes']['class'])) {
+    $form['#attributes']['class'] = 'ajax-form';
+  }
+  else {
+    $form['#attributes']['class'] .= ' ajax-form';
+  }
   return TRUE;
 }
 
@@ -154,7 +159,12 @@ function ajax_validator_set(&$form) {
 function ajax_submitter_set(&$form, $found) {
   if (!$found['submitter']) {
     $form['#submit'][] = 'ajax_submitter';
-    $form['#attributes']['class'] = 'ajax-form';
+    if (empty($form['#attributes']['class'])) {
+      $form['#attributes']['class'] = 'ajax-form';
+    }
+    else {
+      $form['#attributes']['class'] .= ' ajax-form';
+    }
   }
   return TRUE;
 }
