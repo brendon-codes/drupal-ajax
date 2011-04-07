@@ -1,5 +1,0 @@
-name = ZZZZ AJAX Forms
-description = Automatically validates and submits any Drupal form using AJAX. This module needs to run last.
-package = ZZZZ AJAX Forms
-core = 6.x
-

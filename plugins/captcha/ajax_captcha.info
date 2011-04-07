@@ -1,0 +1,7 @@
+name = Ajax plugin - captcha
+description = Enables AJAX functionality with CAPTCHA-enabled forms. This module requires that the patches in 'ajax/plugins/captcha/patches' be applied to the CAPTCHA module.
+package = Ajax
+dependencies[] = ajax
+dependencies[] = captcha
+core = 6.x
+

@@ -1,0 +1,7 @@
+name = Ajax plugin - logintoboggan
+description = Enables AJAX functionality for LoginToboggan forms
+package = Ajax
+dependencies[] = ajax
+dependencies[] = logintoboggan
+core = 6.x
+
