@@ -1,0 +1,7 @@
+name = Ajax plugin - comment
+description = Enables ajax functionality for comment forms
+package = Ajax
+dependencies[] = ajax
+dependencies[] = comment
+core = 6.x
+
