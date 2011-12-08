@@ -30,7 +30,7 @@ function ajax_webform_ajax_types(&$types) {
     '  n.title ' .
     'FROM {node} n ' .
     'WHERE n.type IN ('.$in.')';
-  $res = db_queryd($q);
+  $res = db_query($q);
   while ($row = db_fetch_array($res)) {
     $id = 'webform_client_form_' . (int) $row['nid'];
     $types[$id] = t('Webform: ' . $row['title']);
