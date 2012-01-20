@@ -17,13 +17,16 @@
  * @return Bool
  */
 function ajax_webform_ajax_types(&$types) {
+  $webform_node_types = variable_get('webform_node_types', array('webform'));
+  $placeholders = implode(', ', array_fill(0, count($webform_node_types), "'%s'"));
+  
   $q =
     'SELECT ' .
     '  n.nid, ' .
     '  n.title ' .
     'FROM {node} n ' .
-    'WHERE n.type = "webform" ';
-  $res = db_query($q);
+    'WHERE n.type IN ('.$placeholders.')';
+  $res = db_query($q, $webform_node_types);
   while ($row = db_fetch_array($res)) {
     $id = 'webform_client_form_' . (int) $row['nid'];
     $types[$id] = t('Webform: ' . $row['title']);
