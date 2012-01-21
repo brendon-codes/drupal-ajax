@@ -125,7 +125,8 @@ function ajax_ui_types_user() {
   return array(
     'user_login' => t('User Login'),
     'user_edit' => t('User Edit'),
-    'user_register' => t('User Register')
+    'user_register' => t('User Register'),
+    'user_pass' => t('Reset Password')
   );
 }
 
