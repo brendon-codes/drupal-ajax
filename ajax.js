@@ -31,7 +31,7 @@ Drupal.Ajax.init = function(context) {
       Drupal.Ajax.invoke('init');
       Drupal.Ajax.firstRun = true;
     }
-    s = $('input[type="submit"]', f);
+    s = $('input[type="image"],input[type="submit"]', f);
     s.click(function(){
       this.form.ajax_activator = $(this);
       return true;
