@@ -212,6 +212,10 @@ Drupal.Ajax.updater = function(updaters) {
     else if(updaters[i].type === 'remove') {
       elm.remove();
     }
+    // HIDE
+    else if(updaters[i].type === 'hide') {
+      elm.hide();
+    }
   }
   return true;
 };
