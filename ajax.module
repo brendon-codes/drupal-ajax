@@ -286,6 +286,11 @@ function ajax_build_url($u) {
     $out .= '@';
   }
   $out .= $u['host'];
+  
+  if (!empty($u['port'])) {
+     $out .= ':' . $u['port'];
+  }
+  
   $out .= $u['path'];
   if (!empty($u['query'])) {
     $out .= '?';
