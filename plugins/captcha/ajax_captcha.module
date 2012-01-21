@@ -46,60 +46,59 @@ function ajax_captcha_ajax_validate_pass(&$form, &$form_state, &$data, &$pass) {
  * @param $data Assoc
  * @return Bool
  */
+
 function ajax_captcha_process(&$form, &$form_state, &$data) {
-  //$data['debug'] = 'A';
+  //print_r($data);
   if (array_key_exists('captcha_token', $form_state['values']) &&
       array_key_exists('captcha_type', $form_state['values']) &&
       array_key_exists('captcha_query', $form_state['values'])) {
     //$data['debug'] .= 'B';
-    // COnditional show
-    if (_captcha_persistence_skip($form['form_id']['#value'])) {
+    // Conditional show
+    if (_captcha_required_for_user($form_state['values']['captcha_sid'], $form_id) == NULL) {
       $data['updaters'][] = array(
-          'type' => 'remove',
+          'type' => 'hide',
           'selector' => 'fieldset.captcha',
           'value' => NULL
       );
       //$data['debug'] .= 'C';
     }
-    // ALways Show
-    else {
-      //$data['debug'] .= 'D';
-      // MATH
-      if ($form_state['values']['captcha_type'] === 'math') {
-        $selector =
-          "#edit-captcha-response-wrapper .field-prefix";
-        $type = 'html_in';
-        //$data['debug'] .= 'E';
-      }
-      elseif ($form_state['values']['captcha_type'] === 'text') {
-        $selector =
-          "#edit-captcha-response-wrapper label[for='edit-captcha-response']";
-        $type = 'html_in';
-        //$data['debug'] .= 'F';
-      }
-      elseif ($form_state['values']['captcha_type'] === 'image') {
-        $selector =
-          ".captcha img";
-        $type = 'html_out';
-        //$data['debug'] .= 'G';
-      }
-      $data['updaters'][] = array(
-        'type' => 'field',
-        'selector' => '#edit-captcha-token',
-        'value' => $form_state['values']['captcha_token']
-      );
-      $data['updaters'][] = array(
-        'type' => $type,
-        'selector' => $selector,
-        'value' => $form_state['values']['captcha_query']
-      );
-      $data['updaters'][] = array(
-        'type' => 'field',
-        'selector' => '#edit-captcha-response',
-        'value' => ''
-      );
-      captcha_pre_render($form);
+    //$data['debug'] .= 'D';
+    // MATH
+    if ($form_state['values']['captcha_type'] === 'math') {
+      $selector =
+        "#edit-captcha-response-wrapper .field-prefix";
+      $type = 'html_in';
+      //$data['debug'] .= 'E';
     }
+    elseif ($form_state['values']['captcha_type'] === 'text') {
+      $selector =
+        "#edit-captcha-response-wrapper label[for='edit-captcha-response']";
+      $type = 'html_in';
+      //$data['debug'] .= 'F';
+    }
+    elseif ($form_state['values']['captcha_type'] === 'image') {
+      $selector =
+        ".captcha img";
+      $type = 'html_out';
+      //$data['debug'] .= 'G';
+    }
+    $data['updaters'][] = array(
+      'type' => 'field',
+      'selector' => '#edit-captcha-token',
+      'value' => $form_state['values']['captcha_token']
+    );
+    $data['updaters'][] = array(
+      'type' => $type,
+      'selector' => $selector,
+      'value' => $form_state['values']['captcha_query']
+    );
+    $data['updaters'][] = array(
+      'type' => 'field',
+      'selector' => '#edit-captcha-response',
+      'value' => ''
+    );
+    theme_captcha($form);
   }
+  
   return TRUE;
 }
