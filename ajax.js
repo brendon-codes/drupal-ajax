@@ -6,7 +6,7 @@
  * @depends Drupal 6
  * @author brendoncrawford
  * @note This file uses a 79 character width limit.
- * 
+ *
  *
  */
 
@@ -20,7 +20,7 @@ Drupal.Ajax.firstRun = false;
  * Init function.
  * This is being executed by Drupal behaviours.
  * See bottom of script.
- * 
+ *
  * @param {HTMLElement} context
  * @return {Bool}
  */
@@ -58,7 +58,7 @@ Drupal.Ajax.init = function(context) {
 
 /**
  * Invokes plugins
- * 
+ *
  * @param {Object} formObj
  * @param {Object} submitter
  */
@@ -76,7 +76,7 @@ Drupal.Ajax.invoke = function(hook, args) {
 
 /**
  * Handles submission
- * 
+ *
  * @param {Object} submitter_
  * @return {Bool}
  */
@@ -100,6 +100,7 @@ Drupal.Ajax.go = function(formObj, submitter) {
         name : 'drupal_ajax',
         value : '1'
       };
+      submitter.attr('disabled', 'disabled');
       return true;
     },
     dataType : 'json',
@@ -113,6 +114,7 @@ Drupal.Ajax.go = function(formObj, submitter) {
     success: function(data){
       submitter.val(submitterVal);
       Drupal.Ajax.response(submitter, formObj, data);
+      submitter.removeAttr('disabled');
       return true;
     }
   });
@@ -121,7 +123,7 @@ Drupal.Ajax.go = function(formObj, submitter) {
 
 /**
  * Handles messaging
- * 
+ *
  * @param {Object} formObj
  * @param {Object} submitter
  * @param {Object} data
@@ -143,7 +145,7 @@ Drupal.Ajax.message = function(formObj, submitter, data, options) {
 
 /**
  * Writes message
- * 
+ *
  * @param {Object} formObj
  * @param {Object} submitter
  * @param {Object} options
@@ -188,7 +190,7 @@ Drupal.Ajax.writeMessage = function(formObj, submitter, options) {
 
 /**
  * Updates message containers
- * 
+ *
  * @param {Object} updaters
  * @return {Bool}
  */
@@ -222,7 +224,7 @@ Drupal.Ajax.updater = function(updaters) {
 
 /**
  * Handles data response
- * 
+ *
  * @param {Object} submitter
  * @param {Object} formObj
  * @param {Object} data
@@ -306,7 +308,7 @@ Drupal.Ajax.response = function(submitter, formObj, data){
 
 /**
  * Redirects to appropriate page
- * 
+ *
  * @todo
  *   Some of this functionality should possibly hapen on
  *   the server instead of client.
