@@ -157,6 +157,9 @@ function ajax_validator_set(&$form) {
  * @return Bool
  */
 function ajax_submitter_set(&$form, $found) {
+  if (!isset($_POST['drupal_ajax'])) {
+    return;
+  }
   if (!$found['submitter']) {
     $form['#submit'][] = 'ajax_submitter';
     if (empty($form['#attributes']['class'])) {
@@ -286,11 +289,11 @@ function ajax_build_url($u) {
     $out .= '@';
   }
   $out .= $u['host'];
-  
+
   if (!empty($u['port'])) {
      $out .= ':' . $u['port'];
   }
-  
+
   $out .= $u['path'];
   if (!empty($u['query'])) {
     $out .= '?';
