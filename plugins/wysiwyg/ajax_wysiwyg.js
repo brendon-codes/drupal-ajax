@@ -11,7 +11,7 @@
 
 /**
  * Ajax Forms plugin for wysiwyg API
- * 
+ *
  * @param {String} hook
  * @param {Object} args
  * @return {Bool}
@@ -24,6 +24,15 @@ Drupal.Ajax.plugins.wysiwyg = function(hook, args) {
         p = Drupal.wysiwyg.instances[w];
         e = $('#' + p.field);
         Drupal.wysiwygDetach(e[0], p);
+      }
+    }
+  }
+  if (hook === 'message') {
+    if (Drupal.wysiwyg && Drupal.wysiwygAttach) {
+      for (w in Drupal.wysiwyg.instances) {
+        p = Drupal.wysiwyg.instances[w];
+        e = $('#' + p.field);
+        Drupal.wysiwygAttach(e[0], p);
       }
     }
   }

@@ -221,6 +221,7 @@ function ajax_ui_admin_submit($form, &$form_state) {
     }
   }
   variable_set('ajax', $out);
+  drupal_set_message('Settings saved');
   return TRUE;
 }
 
